@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { shipments as initialShipments, STATUS_LABELS, STATUS_COLORS, type Shipment, type ShipmentStatus } from '@/lib/shipments';
-import { Search, Plus, X, Filter } from 'lucide-react';
+import { getShipments, saveShipment, removeShipment, STATUS_LABELS, STATUS_COLORS, type Shipment, type ShipmentStatus, type PendingCharge } from '@/lib/shipments';
+import { getCharges, getChargeById, formatFee, type ChargeableStatus } from '@/lib/charges';
+import { Search, Plus, X, Filter, DollarSign, CheckCircle2, AlertCircle, Trash2 } from 'lucide-react';
 
 const STATUS_OPTIONS: ShipmentStatus[] = ['pending', 'in_transit', 'customs', 'delivered', 'exception'];
 
@@ -14,12 +15,15 @@ function Badge({ status }: { status: ShipmentStatus }) {
 }
 
 export default function AdminShipments() {
-  const [shipments, setShipments] = useState<Shipment[]>(initialShipments);
+  const [shipments, setShipments] = useState<Shipment[]>(getShipments);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<ShipmentStatus | 'all'>('all');
   const [modal, setModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [statusUpdating, setStatusUpdating] = useState<string | null>(null);
+  const [chargeModal, setChargeModal] = useState<string | null>(null); // shipment id
+  const [selectedChargeId, setSelectedChargeId] = useState('');
+  const charges = getCharges().filter(c => c.active);
 
   const [form, setForm] = useState({
     id: '', client: '', clientEmail: '', origin: '', destination: '',
@@ -28,14 +32,20 @@ export default function AdminShipments() {
   });
 
   const filtered = shipments.filter(s => {
-    const matchQ = !query || s.id.toLowerCase().includes(query.toLowerCase()) || s.client.toLowerCase().includes(query.toLowerCase()) || s.destination.toLowerCase().includes(query.toLowerCase());
+    const q = query.toLowerCase();
+    const matchQ = !query || s.id.toLowerCase().includes(q) || s.client.toLowerCase().includes(q) || s.destination.toLowerCase().includes(q);
     const matchF = filter === 'all' || s.status === filter;
     return matchQ && matchF;
   });
 
   function openNew() {
     setEditingId(null);
-    setForm({ id: `CDHL-${String(shipments.length + 1).padStart(4, '0')}-XX`, client: '', clientEmail: '', origin: '', destination: '', status: 'pending', service: 'Air Freight', weight: '', date: new Date().toISOString().split('T')[0], eta: '' });
+    setForm({
+      id: `CDHL-${String(shipments.length + 1).padStart(4, '0')}-XX`,
+      client: '', clientEmail: '', origin: '', destination: '',
+      status: 'pending', service: 'Air Freight', weight: '',
+      date: new Date().toISOString().split('T')[0], eta: '',
+    });
     setModal(true);
   }
 
@@ -47,24 +57,94 @@ export default function AdminShipments() {
 
   function saveForm() {
     if (!form.client || !form.origin || !form.destination) return;
-    if (editingId) {
-      setShipments(prev => prev.map(s => s.id === editingId ? { ...form } : s));
-    } else {
-      setShipments(prev => [form, ...prev]);
-    }
+    const updated = editingId
+      ? shipments.map(s => s.id === editingId ? { ...s, ...form } : s)
+      : [{ ...form } as Shipment, ...shipments];
+    updated.forEach(s => saveShipment(s));
+    setShipments(updated);
     setModal(false);
   }
 
   function updateStatus(id: string, status: ShipmentStatus) {
     setStatusUpdating(id);
     setTimeout(() => {
-      setShipments(prev => prev.map(s => s.id === id ? { ...s, status } : s));
+      setShipments(prev => {
+        const next = prev.map(s => s.id === id ? { ...s, status } : s);
+        const target = next.find(s => s.id === id);
+        if (target) saveShipment(target);
+        return next;
+      });
       setStatusUpdating(null);
-    }, 400);
+    }, 300);
   }
 
   function deleteShipment(id: string) {
-    if (confirm('Delete this shipment?')) setShipments(prev => prev.filter(s => s.id !== id));
+    if (confirm('Delete this shipment?')) {
+      removeShipment(id);
+      setShipments(prev => prev.filter(s => s.id !== id));
+    }
+  }
+
+  function openChargeModal(shipmentId: string) {
+    setSelectedChargeId('');
+    setChargeModal(shipmentId);
+  }
+
+  function assignCharge() {
+    if (!selectedChargeId || !chargeModal) return;
+    const pc: PendingCharge = {
+      chargeId: selectedChargeId,
+      assignedAt: new Date().toISOString().split('T')[0],
+      paid: false,
+    };
+    setShipments(prev => {
+      const next = prev.map(s => s.id === chargeModal ? { ...s, pendingCharge: pc } : s);
+      const target = next.find(s => s.id === chargeModal);
+      if (target) saveShipment(target);
+      return next;
+    });
+    setChargeModal(null);
+  }
+
+  function markPaid(shipmentId: string) {
+    setShipments(prev => {
+      const next = prev.map(s =>
+        s.id === shipmentId && s.pendingCharge
+          ? { ...s, pendingCharge: { ...s.pendingCharge, paid: true, paidAt: new Date().toISOString().split('T')[0] } }
+          : s
+      );
+      const target = next.find(s => s.id === shipmentId);
+      if (target) saveShipment(target);
+      return next;
+    });
+  }
+
+  function removeCharge(shipmentId: string) {
+    if (!confirm('Remove the charge from this shipment?')) return;
+    setShipments(prev => {
+      const next = prev.map(s => s.id === shipmentId ? { ...s, pendingCharge: undefined } : s);
+      const target = next.find(s => s.id === shipmentId);
+      if (target) saveShipment(target);
+      return next;
+    });
+  }
+
+  function ChargeBadge({ s }: { s: Shipment }) {
+    if (!s.pendingCharge) return null;
+    const ch = getChargeById(s.pendingCharge.chargeId);
+    if (!ch) return null;
+    if (s.pendingCharge.paid) {
+      return (
+        <div className="flex items-center gap-1 text-green-600 text-[10px] font-bold mt-1 whitespace-nowrap">
+          <CheckCircle2 size={11} /> Paid
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center gap-1 text-orange-500 text-[10px] font-bold mt-1 whitespace-nowrap">
+        <DollarSign size={11} /> {formatFee(ch)}
+      </div>
+    );
   }
 
   return (
@@ -101,26 +181,26 @@ export default function AdminShipments() {
           <table className="w-full">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100">
-                {['Tracking ID', 'Client', 'Route', 'Service', 'Weight', 'Status', 'ETA', 'Actions'].map(h => (
-                  <th key={h} className="text-left px-5 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 whitespace-nowrap">{h}</th>
+                {['Tracking ID', 'Client', 'Route', 'Service', 'Weight', 'Status', 'Charge', 'ETA', 'Actions'].map(h => (
+                  <th key={h} className="text-left px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {filtered.length === 0 && (
-                <tr><td colSpan={8} className="text-center py-12 text-slate-400 text-sm">No shipments found</td></tr>
+                <tr><td colSpan={9} className="text-center py-12 text-slate-400 text-sm">No shipments found</td></tr>
               )}
               {filtered.map(s => (
                 <tr key={s.id} className={`hover:bg-slate-50/50 transition-colors ${statusUpdating === s.id ? 'opacity-50' : ''}`}>
-                  <td className="px-5 py-4 font-mono text-sm font-semibold text-slate-900 whitespace-nowrap">{s.id}</td>
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-4 font-mono text-sm font-semibold text-slate-900 whitespace-nowrap">{s.id}</td>
+                  <td className="px-4 py-4">
                     <div className="text-sm font-semibold text-slate-900">{s.client}</div>
                     <div className="text-xs text-slate-400">{s.clientEmail}</div>
                   </td>
-                  <td className="px-5 py-4 text-sm text-slate-500 whitespace-nowrap">{s.origin} → {s.destination}</td>
-                  <td className="px-5 py-4 text-sm text-slate-500 whitespace-nowrap">{s.service}</td>
-                  <td className="px-5 py-4 text-sm text-slate-500">{s.weight}</td>
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-4 text-sm text-slate-500 whitespace-nowrap">{s.origin} → {s.destination}</td>
+                  <td className="px-4 py-4 text-sm text-slate-500 whitespace-nowrap">{s.service}</td>
+                  <td className="px-4 py-4 text-sm text-slate-500">{s.weight}</td>
+                  <td className="px-4 py-4">
                     <select
                       value={s.status}
                       onChange={e => updateStatus(s.id, e.target.value as ShipmentStatus)}
@@ -129,9 +209,36 @@ export default function AdminShipments() {
                       {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{STATUS_LABELS[opt]}</option>)}
                     </select>
                   </td>
-                  <td className="px-5 py-4 text-sm text-slate-500 whitespace-nowrap">{s.eta}</td>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-2">
+
+                  {/* Charge column */}
+                  <td className="px-4 py-4">
+                    {s.pendingCharge ? (
+                      <div className="flex flex-col gap-1">
+                        <ChargeBadge s={s} />
+                        <div className="flex items-center gap-1">
+                          {!s.pendingCharge.paid && (
+                            <button onClick={() => markPaid(s.id)}
+                              className="text-[10px] font-bold text-green-600 hover:text-green-700 px-2 py-0.5 rounded-md hover:bg-green-50 transition-colors whitespace-nowrap">
+                              Mark paid
+                            </button>
+                          )}
+                          <button onClick={() => removeCharge(s.id)}
+                            className="text-[10px] font-bold text-red-400 hover:text-red-600 px-1.5 py-0.5 rounded-md hover:bg-red-50 transition-colors">
+                            <Trash2 size={10} />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button onClick={() => openChargeModal(s.id)}
+                        className="flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-orange-500 px-2 py-1 rounded-lg hover:bg-orange-50 transition-colors whitespace-nowrap border border-dashed border-slate-200 hover:border-orange-200">
+                        <DollarSign size={10} /> Assign
+                      </button>
+                    )}
+                  </td>
+
+                  <td className="px-4 py-4 text-sm text-slate-500 whitespace-nowrap">{s.eta}</td>
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-1">
                       <button onClick={() => openEdit(s)}
                         className="text-xs font-semibold text-orange-500 hover:text-orange-600 transition-colors px-2.5 py-1 rounded-lg hover:bg-orange-50">
                         Edit
@@ -152,7 +259,7 @@ export default function AdminShipments() {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Shipment Edit/Create Modal */}
       {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setModal(false)} />
@@ -202,6 +309,67 @@ export default function AdminShipments() {
               <button onClick={() => setModal(false)} className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
               <button onClick={saveForm} className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold shadow-lg shadow-orange-500/20">
                 {editingId ? 'Save Changes' : 'Create Shipment'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Charge Assignment Modal */}
+      {chargeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setChargeModal(null)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-orange-50 rounded-xl flex items-center justify-center">
+                  <DollarSign size={17} className="text-orange-500" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base leading-none">Assign Charge</h3>
+                  <p className="text-slate-400 text-xs mt-0.5">Shipment {chargeModal}</p>
+                </div>
+              </div>
+              <button onClick={() => setChargeModal(null)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
+            </div>
+
+            <div className="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-xl px-3.5 py-3 mb-5">
+              <AlertCircle size={14} className="text-amber-500 mt-0.5 shrink-0" />
+              <p className="text-amber-700 text-xs leading-relaxed">
+                The customer will be notified on their tracking page and instructed to contact <strong>support@cargodhl.com</strong> to clear this charge. No payment is collected online.
+              </p>
+            </div>
+
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Select Chargeable Status</label>
+            <select
+              value={selectedChargeId}
+              onChange={e => setSelectedChargeId(e.target.value)}
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/30 mb-3"
+            >
+              <option value="">— Choose a charge —</option>
+              {charges.map((c: ChargeableStatus) => (
+                <option key={c.id} value={c.id}>{c.name} ({formatFee(c)})</option>
+              ))}
+            </select>
+
+            {selectedChargeId && (() => {
+              const ch = charges.find(c => c.id === selectedChargeId);
+              if (!ch) return null;
+              return (
+                <div className="bg-slate-50 rounded-xl p-4 mb-5 text-sm">
+                  <div className="font-bold text-slate-800 mb-1">{ch.name}</div>
+                  <div className="text-slate-500 text-xs mb-2">{ch.description}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Customer message preview:</div>
+                  <p className="text-slate-600 text-xs leading-relaxed">{ch.customerMessage}</p>
+                </div>
+              );
+            })()}
+
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setChargeModal(null)} className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+              <button onClick={assignCharge} disabled={!selectedChargeId}
+                className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-sm font-bold shadow-lg shadow-orange-500/20">
+                Assign Charge
               </button>
             </div>
           </div>

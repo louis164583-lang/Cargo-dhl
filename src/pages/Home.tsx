@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import {
   Truck, Plane, Warehouse, MapPin, Shield, Clock, Globe, Star,
@@ -58,9 +58,9 @@ function Navbar() {
 
         <div className="hidden md:flex items-center gap-3">
           <Link to="/admin/login" className="text-white/50 text-xs font-medium hover:text-white/80 transition-colors">Admin</Link>
-          <a href="#hero-track" className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-full transition-all hover:scale-105 shadow-lg shadow-orange-500/30">
+          <Link to="/track" className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-full transition-all hover:scale-105 shadow-lg shadow-orange-500/30">
             Track
-          </a>
+          </Link>
         </div>
 
         <button className="md:hidden text-white" onClick={() => setOpen(!open)}>
@@ -94,6 +94,14 @@ function Navbar() {
 /* ── Hero ── */
 function Hero() {
   const [tracking, setTracking] = useState('');
+  const navigate = useNavigate();
+
+  function handleTrack(e: React.FormEvent) {
+    e.preventDefault();
+    const id = tracking.trim();
+    if (!id) return;
+    navigate(`/track/${id}`);
+  }
 
   return (
     <section id="home" className="relative min-h-screen flex items-center overflow-hidden">
@@ -177,7 +185,7 @@ function Hero() {
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <form onSubmit={handleTrack} className="space-y-3">
                 <input
                   type="text"
                   value={tracking}
@@ -185,10 +193,10 @@ function Hero() {
                   placeholder="e.g. CDHL-0013-LG"
                   className="w-full bg-white border border-slate-200 text-slate-900 placeholder-slate-400 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono"
                 />
-                <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl transition-all hover:scale-[1.02] text-sm shadow-lg shadow-orange-500/30">
+                <button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl transition-all hover:scale-[1.02] text-sm shadow-lg shadow-orange-500/30">
                   <Search size={15} className="inline mr-2" /> Track Package
                 </button>
-              </div>
+              </form>
 
               <div className="mt-5 pt-5 border-t border-white/10 flex items-center justify-between text-xs text-white/35">
                 <span className="flex items-center gap-1.5">

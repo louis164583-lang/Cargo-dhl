@@ -1,6 +1,13 @@
 export type ShipmentStatus = 'pending' | 'in_transit' | 'customs' | 'delivered' | 'exception';
 export type ServiceType = 'Air Freight' | 'Road Freight' | 'Warehousing' | 'Last Mile';
 
+export interface PendingCharge {
+  chargeId: string;
+  assignedAt: string;
+  paid: boolean;
+  paidAt?: string;
+}
+
 export interface Shipment {
   id: string;
   client: string;
@@ -10,8 +17,10 @@ export interface Shipment {
   status: ShipmentStatus;
   service: ServiceType;
   weight: string;
+  weightKg?: number;
   date: string;
   eta: string;
+  pendingCharge?: PendingCharge;
 }
 
 export interface Client {
@@ -44,6 +53,41 @@ export const clients: Client[] = [
   { id: 'CLT-005', name: 'ArtHouse Berlin', email: 'studio@arthouse.de', phone: '+49 30 555 0177', country: 'Germany', shipments: 4, status: 'inactive', joined: '2025-06-15' },
   { id: 'CLT-006', name: 'FashionFwd', email: 'export@fashionfwd.com', phone: '+971 4 555 0133', country: 'UAE', shipments: 7, status: 'active', joined: '2025-08-22' },
 ];
+
+const SHIP_KEY = 'cdhl_shipments';
+
+function loadShipments(): Shipment[] {
+  try {
+    const raw = localStorage.getItem(SHIP_KEY);
+    return raw ? JSON.parse(raw) : shipments;
+  } catch {
+    return shipments;
+  }
+}
+
+function persistShipments(data: Shipment[]) {
+  localStorage.setItem(SHIP_KEY, JSON.stringify(data));
+}
+
+export function getShipments(): Shipment[] {
+  return loadShipments();
+}
+
+export function saveShipment(s: Shipment): void {
+  const all = loadShipments();
+  const idx = all.findIndex(x => x.id === s.id);
+  if (idx >= 0) all[idx] = s;
+  else all.unshift(s);
+  persistShipments(all);
+}
+
+export function removeShipment(id: string): void {
+  persistShipments(loadShipments().filter(s => s.id !== id));
+}
+
+export function getShipmentById(id: string): Shipment | undefined {
+  return loadShipments().find(s => s.id.toLowerCase() === id.toLowerCase());
+}
 
 export const STATUS_LABELS: Record<ShipmentStatus, string> = {
   pending: 'Pending',
