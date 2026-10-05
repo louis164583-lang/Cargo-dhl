@@ -1,59 +1,144 @@
 import AdminLayout from '@/components/admin/AdminLayout';
-import { shipments, clients, STATUS_LABELS, STATUS_COLORS } from '@/lib/shipments';
-import { Package, Users, TrendingUp, Clock, ArrowRight } from 'lucide-react';
+import { getShipments, STATUS_LABELS, STATUS_COLORS } from '@/lib/shipments';
+import { getCharges } from '@/lib/charges';
+import { Package, TrendingUp, CheckCircle, AlertCircle, DollarSign, ArrowRight, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function AdminDashboard() {
-  const total = shipments.length;
-  const inTransit = shipments.filter(s => s.status === 'in_transit').length;
-  const delivered = shipments.filter(s => s.status === 'delivered').length;
+  const shipments = getShipments();
+  const charges = getCharges();
+
+  const total      = shipments.length;
+  const inTransit  = shipments.filter(s => s.status === 'in_transit').length;
+  const delivered  = shipments.filter(s => s.status === 'delivered').length;
   const exceptions = shipments.filter(s => s.status === 'exception').length;
+  const pending    = shipments.filter(s => s.status === 'pending').length;
+  const atCustoms  = shipments.filter(s => s.status === 'customs').length;
+
+  const unpaidCharges = shipments.filter(s => s.pendingCharge && !s.pendingCharge.paid).length;
+  const paidCharges   = shipments.filter(s => s.pendingCharge?.paid).length;
+  const activeChargeTypes = charges.filter(c => c.active).length;
+
+  const recent = [...shipments].slice(0, 6);
 
   const stats = [
-    { label: 'Total Shipments', value: total, icon: Package, color: 'bg-orange-50 text-orange-500', change: '+3 this week' },
-    { label: 'In Transit', value: inTransit, icon: TrendingUp, color: 'bg-blue-50 text-blue-500', change: 'Active now' },
-    { label: 'Delivered', value: delivered, icon: TrendingUp, color: 'bg-green-50 text-green-600', change: 'This month' },
-    { label: 'Active Clients', value: clients.filter(c => c.status === 'active').length, icon: Users, color: 'bg-purple-50 text-purple-600', change: `${clients.length} total` },
+    {
+      label: 'Total Shipments',
+      value: total,
+      icon: Package,
+      iconBg: 'bg-orange-50',
+      iconColor: 'text-orange-500',
+      sub: `${pending} pending`,
+    },
+    {
+      label: 'In Transit',
+      value: inTransit,
+      icon: TrendingUp,
+      iconBg: 'bg-blue-50',
+      iconColor: 'text-blue-500',
+      sub: `${atCustoms} at customs`,
+    },
+    {
+      label: 'Delivered',
+      value: delivered,
+      icon: CheckCircle,
+      iconBg: 'bg-green-50',
+      iconColor: 'text-green-600',
+      sub: `${Math.round((delivered / (total || 1)) * 100)}% success rate`,
+    },
+    {
+      label: 'Unpaid Charges',
+      value: unpaidCharges,
+      icon: DollarSign,
+      iconBg: unpaidCharges > 0 ? 'bg-red-50' : 'bg-slate-50',
+      iconColor: unpaidCharges > 0 ? 'text-red-500' : 'text-slate-400',
+      sub: `${paidCharges} cleared · ${activeChargeTypes} charge types`,
+    },
   ];
-
-  const recent = shipments.slice(0, 5);
 
   return (
     <AdminLayout title="Dashboard">
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {stats.map(s => (
           <div key={s.label} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">{s.label}</span>
-              <div className={`w-9 h-9 ${s.color} rounded-xl flex items-center justify-center`}>
-                <s.icon size={17} />
+              <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider leading-tight">{s.label}</span>
+              <div className={`w-9 h-9 ${s.iconBg} rounded-xl flex items-center justify-center shrink-0`}>
+                <s.icon size={17} className={s.iconColor} />
               </div>
             </div>
             <div className="text-3xl font-black text-slate-900">{s.value}</div>
-            <div className="text-slate-400 text-xs mt-1">{s.change}</div>
+            <div className="text-slate-400 text-xs mt-1">{s.sub}</div>
           </div>
         ))}
       </div>
 
-      {/* Exception alert */}
-      {exceptions > 0 && (
-        <div className="bg-red-50 border border-red-100 rounded-2xl p-4 mb-6 flex items-center gap-3">
-          <div className="w-8 h-8 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
-            <Clock size={15} className="text-red-500" />
+      {/* Exception + unpaid charge alerts */}
+      <div className="space-y-3 mb-6">
+        {exceptions > 0 && (
+          <div className="bg-red-50 border border-red-100 rounded-2xl px-5 py-4 flex items-center gap-3">
+            <div className="w-8 h-8 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
+              <AlertCircle size={15} className="text-red-500" />
+            </div>
+            <div className="flex-1">
+              <span className="text-red-700 font-semibold text-sm">
+                {exceptions} shipment{exceptions > 1 ? 's' : ''} flagged as Exception
+              </span>
+              <p className="text-red-400 text-xs mt-0.5">Delivery could not be completed — action required.</p>
+            </div>
+            <Link to="/admin/shipments" className="text-red-500 text-xs font-bold hover:text-red-600 flex items-center gap-1 shrink-0">
+              Review <ArrowRight size={12} />
+            </Link>
           </div>
-          <div className="flex-1">
-            <span className="text-red-700 font-semibold text-sm">{exceptions} shipment{exceptions > 1 ? 's' : ''} need attention</span>
-            <p className="text-red-500/70 text-xs mt-0.5">Exception status detected — review required.</p>
+        )}
+
+        {unpaidCharges > 0 && (
+          <div className="bg-amber-50 border border-amber-100 rounded-2xl px-5 py-4 flex items-center gap-3">
+            <div className="w-8 h-8 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
+              <DollarSign size={15} className="text-amber-600" />
+            </div>
+            <div className="flex-1">
+              <span className="text-amber-800 font-semibold text-sm">
+                {unpaidCharges} unpaid charge{unpaidCharges > 1 ? 's' : ''} outstanding
+              </span>
+              <p className="text-amber-600 text-xs mt-0.5">Awaiting customer payment via email.</p>
+            </div>
+            <Link to="/admin/shipments" className="text-amber-600 text-xs font-bold hover:text-amber-700 flex items-center gap-1 shrink-0">
+              Review <ArrowRight size={12} />
+            </Link>
           </div>
-          <Link to="/admin/shipments" className="text-red-500 text-xs font-semibold hover:text-red-600 flex items-center gap-1">
-            View <ArrowRight size={12} />
-          </Link>
+        )}
+      </div>
+
+      {/* Status breakdown bar */}
+      <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm mb-6">
+        <h2 className="font-bold text-slate-900 text-sm mb-4">Shipment Status Overview</h2>
+        <div className="space-y-3">
+          {([
+            { key: 'pending',    label: 'Pending',    count: pending,   color: 'bg-yellow-400' },
+            { key: 'in_transit', label: 'In Transit', count: inTransit, color: 'bg-blue-500' },
+            { key: 'customs',    label: 'At Customs', count: atCustoms, color: 'bg-purple-500' },
+            { key: 'delivered',  label: 'Delivered',  count: delivered, color: 'bg-green-500' },
+            { key: 'exception',  label: 'Exception',  count: exceptions,color: 'bg-red-500' },
+          ] as const).map(({ label, count, color }) => (
+            <div key={label} className="flex items-center gap-3">
+              <div className="w-24 text-xs font-semibold text-slate-500 shrink-0">{label}</div>
+              <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
+                <div
+                  className={`h-2 rounded-full ${color} transition-all duration-500`}
+                  style={{ width: total ? `${(count / total) * 100}%` : '0%' }}
+                />
+              </div>
+              <div className="w-6 text-right text-xs font-black text-slate-700 shrink-0">{count}</div>
+            </div>
+          ))}
         </div>
-      )}
+      </div>
 
       {/* Recent shipments */}
-      <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden mb-6">
+      <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h2 className="font-bold text-slate-900">Recent Shipments</h2>
           <Link to="/admin/shipments" className="text-orange-500 text-sm font-semibold hover:text-orange-600 flex items-center gap-1">
@@ -64,22 +149,37 @@ export default function AdminDashboard() {
           <table className="w-full">
             <thead>
               <tr className="bg-slate-50">
-                {['Tracking ID', 'Client', 'Route', 'Service', 'Status'].map(h => (
-                  <th key={h} className="text-left px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">{h}</th>
+                {['Tracking ID', 'Customer', 'Route', 'Service', 'Status', 'Charge'].map(h => (
+                  <th key={h} className="text-left px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
+              {recent.length === 0 && (
+                <tr><td colSpan={6} className="text-center py-10 text-slate-400 text-sm">No shipments yet</td></tr>
+              )}
               {recent.map(s => (
                 <tr key={s.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 font-mono text-sm font-semibold text-slate-900">{s.id}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{s.client}</td>
-                  <td className="px-6 py-4 text-sm text-slate-500">{s.origin} → {s.destination}</td>
-                  <td className="px-6 py-4 text-sm text-slate-500">{s.service}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-5 py-3.5 font-mono text-sm font-semibold text-slate-900 whitespace-nowrap">{s.id}</td>
+                  <td className="px-5 py-3.5">
+                    <div className="text-sm font-semibold text-slate-800">{s.client}</div>
+                    <div className="text-xs text-slate-400">{s.clientEmail}</div>
+                  </td>
+                  <td className="px-5 py-3.5 text-sm text-slate-500 whitespace-nowrap">{s.origin} → {s.destination}</td>
+                  <td className="px-5 py-3.5 text-sm text-slate-500 whitespace-nowrap">{s.service}</td>
+                  <td className="px-5 py-3.5">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[s.status]}`}>
                       {STATUS_LABELS[s.status]}
                     </span>
+                  </td>
+                  <td className="px-5 py-3.5">
+                    {s.pendingCharge ? (
+                      <span className={`text-xs font-bold ${s.pendingCharge.paid ? 'text-green-600' : 'text-orange-500'}`}>
+                        {s.pendingCharge.paid ? '✓ Paid' : '⏳ Unpaid'}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-300">—</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -88,36 +188,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Quick client list */}
-      <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h2 className="font-bold text-slate-900">Top Clients</h2>
-          <Link to="/admin/clients" className="text-orange-500 text-sm font-semibold hover:text-orange-600 flex items-center gap-1">
-            View all <ArrowRight size={13} />
-          </Link>
-        </div>
-        <div className="divide-y divide-slate-50">
-          {clients.slice(0, 4).map(c => (
-            <div key={c.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-slate-50/50 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-orange-50 rounded-full flex items-center justify-center text-orange-500 text-xs font-black">
-                  {c.name.slice(0, 2).toUpperCase()}
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-slate-900">{c.name}</div>
-                  <div className="text-xs text-slate-400">{c.country}</div>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm font-bold text-slate-900">{c.shipments} shipments</div>
-                <span className={`text-xs font-semibold ${c.status === 'active' ? 'text-green-600' : 'text-slate-400'}`}>
-                  {c.status}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </AdminLayout>
   );
 }
