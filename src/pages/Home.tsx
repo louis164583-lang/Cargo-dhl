@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import {
   Truck, Plane, Warehouse, MapPin, Shield, Clock, Globe, Star,
-  Search, Menu, X, Phone, Mail, ArrowRight, CheckCircle, Package,
+  Search, Menu, X, Mail, ArrowRight, CheckCircle, Package,
   Twitter, Linkedin, Instagram, Facebook,
 } from 'lucide-react';
 
@@ -497,8 +497,8 @@ function CTA() {
           <a href="#hero-track" className="bg-white text-orange-600 font-black px-10 py-5 rounded-full text-base hover:bg-orange-50 transition-all hover:scale-105 shadow-2xl">
             Track a Package
           </a>
-          <a href="tel:+18001234567" className="border-2 border-white/40 text-white font-bold px-10 py-5 rounded-full text-base hover:bg-white/10 transition-all backdrop-blur-sm">
-            <Phone size={16} className="inline mr-2" /> Call Us
+          <a href="mailto:cdhl04192@gmail.com" className="border-2 border-white/40 text-white font-bold px-10 py-5 rounded-full text-base hover:bg-white/10 transition-all backdrop-blur-sm">
+            <Mail size={16} className="inline mr-2" /> Email Us
           </a>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-8 mt-14 pt-14 border-t border-white/15 text-white/55 text-sm">
@@ -560,9 +560,10 @@ function Footer() {
           <div>
             <h4 className="text-[11px] font-bold uppercase tracking-[.22em] text-white/30 mb-5">Contact</h4>
             <ul className="space-y-3 text-sm text-white/50">
-              <li className="flex items-start gap-2.5"><Phone size={13} className="text-orange-400 mt-0.5 shrink-0" />+1 800 123 4567</li>
-              <li className="flex items-start gap-2.5"><Mail size={13} className="text-orange-400 mt-0.5 shrink-0" />cdhl04192@gmail.com</li>
-              <li className="flex items-start gap-2.5"><MapPin size={13} className="text-orange-400 mt-0.5 shrink-0" />53 Logistics Way, Frankfurt DE</li>
+              <li className="flex items-start gap-2.5">
+                <Mail size={13} className="text-orange-400 mt-0.5 shrink-0" />
+                <a href="mailto:cdhl04192@gmail.com" className="hover:text-white transition-colors">cdhl04192@gmail.com</a>
+              </li>
             </ul>
           </div>
         </div>

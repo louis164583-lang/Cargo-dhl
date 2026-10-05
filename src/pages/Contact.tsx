@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import {
-  Truck, ArrowLeft, Mail, Phone, MapPin, Clock, Send, CheckCircle,
+  Truck, ArrowLeft, Mail, MapPin, Clock, Send, CheckCircle,
   Twitter, Linkedin, Instagram, Facebook, ChevronDown,
 } from 'lucide-react';
 
@@ -25,32 +25,24 @@ const OFFICES = [
     city: 'New York',
     flag: '🇺🇸',
     address: '350 Fifth Avenue, Suite 4100\nNew York, NY 10118',
-    phone: '+1 (212) 555-0188',
-    email: 'nyc@cargodhl.com',
     hours: 'Mon–Fri 08:00–18:00 EST',
   },
   {
     city: 'London',
     flag: '🇬🇧',
     address: '30 St Mary Axe (The Gherkin)\nLondon, EC3A 8BF',
-    phone: '+44 (20) 7555 0172',
-    email: 'london@cargodhl.com',
     hours: 'Mon–Fri 08:00–18:00 GMT',
   },
   {
     city: 'Dubai',
     flag: '🇦🇪',
     address: 'Dubai Airport Free Zone\nBuilding 6W, Gate 5, Dubai',
-    phone: '+971 4 555 0133',
-    email: 'dubai@cargodhl.com',
     hours: 'Sun–Thu 08:00–17:00 GST',
   },
   {
     city: 'Lagos',
     flag: '🇳🇬',
     address: 'FAAN Complex, MMA2 Terminal\nIkeja, Lagos State',
-    phone: '+234 (1) 555 0177',
-    email: 'lagos@cargodhl.com',
     hours: 'Mon–Fri 08:00–17:00 WAT',
   },
 ];
@@ -130,11 +122,10 @@ export default function ContactPage() {
 
         {/* ── Quick contact strip ── */}
         <FadeUp>
-          <div className="grid sm:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 gap-4">
             {[
-              { icon: Phone,  label: 'Call us',       value: '+1 (212) 555-0188',      sub: 'New York HQ · Mon–Fri 08–18 EST', href: 'tel:+12125550188' },
-              { icon: Mail,   label: 'Email us',       value: 'cdhl04192@gmail.com',   sub: 'We reply within 24 hours',        href: 'mailto:cdhl04192@gmail.com' },
-              { icon: Clock,  label: '24/7 Tracking',  value: 'Always available',        sub: 'Use the Track page for live updates', href: '/track' },
+              { icon: Mail,   label: 'Email us',      value: 'cdhl04192@gmail.com', sub: 'We reply within 24 hours',           href: 'mailto:cdhl04192@gmail.com' },
+              { icon: Clock,  label: '24/7 Tracking', value: 'Always available',     sub: 'Use the Track page for live updates', href: '/track' },
             ].map(({ icon: Icon, label, value, sub, href }) => (
               <a key={label} href={href}
                 className="group bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-orange-100 transition-all flex items-start gap-4">
@@ -247,12 +238,8 @@ export default function ContactPage() {
                     <span className="whitespace-pre-line leading-snug">{o.address}</span>
                   </div>
                   <div className="flex items-center gap-2.5">
-                    <Phone size={13} className="text-slate-300 shrink-0" />
-                    <a href={`tel:${o.phone.replace(/\s/g, '')}`} className="text-slate-500 hover:text-orange-500 transition-colors">{o.phone}</a>
-                  </div>
-                  <div className="flex items-center gap-2.5">
                     <Mail size={13} className="text-slate-300 shrink-0" />
-                    <a href={`mailto:${o.email}`} className="text-slate-500 hover:text-orange-500 transition-colors">{o.email}</a>
+                    <a href="mailto:cdhl04192@gmail.com" className="text-slate-500 hover:text-orange-500 transition-colors">cdhl04192@gmail.com</a>
                   </div>
                   <div className="flex items-center gap-2.5 text-slate-400 text-xs mt-1 pt-2 border-t border-slate-50">
                     <Clock size={11} className="shrink-0" />
