@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{ mobileOpen: false }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargo DHL — Global Shipping & Logistics</title>
+    <meta name="description" content="Fast, secure worldwide shipping with real-time tracking, customs handling and door-to-door delivery across 220+ countries.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dhl: {
+                            red: '#D40511',
+                            yellow: '#FFCC00',
+                            dark: '#1A1A1A',
+                            darker: '#0D0D0D',
+                        }
+                    },
+                    fontFamily: { sans: ['Poppins', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Poppins', sans-serif; }
+
+        /* ── Hero animations ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; } to { opacity: 1; }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(-14px); }
+        }
+        @keyframes scrollDot {
+            0%, 100% { transform: translateY(0); opacity: 1; }
+            60%       { transform: translateY(8px); opacity: 0; }
+        }
+        @keyframes shimmer {
+            0%   { background-position: -200% center; }
+            100% { background-position:  200% center; }
+        }
+        @keyframes pulseRing {
+            0%   { transform: scale(1);   opacity: .5; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+
+        .anim-badge  { animation: fadeUp .6s ease both; }
+        .anim-h1     { animation: fadeUp .8s .1s ease both; }
+        .anim-sub    { animation: fadeUp .8s .25s ease both; }
+        .anim-trust  { animation: fadeUp .8s .4s ease both; }
+        .anim-btns   { animation: fadeUp .8s .5s ease both; }
+        .anim-form   { animation: fadeUp .9s .35s ease both; }
+        .anim-img    { animation: fadeIn 1.2s .3s ease both; }
+
+        .float       { animation: float 6s ease-in-out infinite; }
+        .float-late  { animation: float 6s 3s ease-in-out infinite; }
+
+        /* Navbar shrink */
+        .nav-solid {
+            background: rgba(13, 13, 13, .97) !important;
+            box-shadow: 0 2px 24px rgba(0,0,0,.4);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #D40511; border-radius: 4px; }
+
+        /* Service card hover */
+        .svc-card {
+            transition: transform .3s cubic-bezier(.25,.8,.25,1), box-shadow .3s ease;
+        }
+        .svc-card:hover { transform: translateY(-8px); box-shadow: 0 24px 48px rgba(0,0,0,.12); }
+
+        /* Image gallery zoom */
+        .gallery-img { transition: transform .6s cubic-bezier(.25,.8,.25,1); }
+        .gallery-wrap:hover .gallery-img { transform: scale(1.08); }
+
+        /* Shimmer text */
+        .shimmer-text {
+            background: linear-gradient(90deg, #D40511 0%, #FFCC00 40%, #D40511 60%, #FFCC00 100%);
+            background-size: 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 4s linear infinite;
+        }
+
+        /* Pulse ring on CTA */
+        .pulse-ring::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: #D40511;
+            animation: pulseRing 1.8s ease-out infinite;
+            z-index: -1;
+        }
+
+        /* Scroll indicator dot */
+        .scroll-dot { animation: scrollDot 2s ease-in-out infinite; }
+
+        /* Step connector */
+        .step-line::after {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: calc(50% + 40px);
+            width: calc(100% - 80px);
+            height: 2px;
+            background: linear-gradient(90deg, #D40511, #FFCC00);
+        }
+
+        /* Counter number glow */
+        .counter-glow { text-shadow: 0 0 40px rgba(255, 204, 0, .25); }
+    </style>
+</head>
+
+<body class="bg-white overflow-x-hidden">
+
+<!-- ════════════════════════════════ NAVIGATION ════════════════════════════════ -->
+<nav class="fixed top-0 inset-x-0 z-50 bg-transparent transition-all duration-400" id="navbar">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+
+            <!-- Logo -->
+            <a href="#home" class="flex items-center gap-2.5">
+                <div class="relative">
+                    <div class="w-10 h-10 bg-dhl-red rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-shipping-fast text-white text-base"></i>
+                    </div>
+                </div>
+                <div class="leading-none">
+                    <span class="text-white font-black text-xl tracking-tight">CARGO</span>
+                    <span class="text-dhl-yellow font-black text-xl tracking-tight"> DHL</span>
+                </div>
+            </a>
+
+            <!-- Desktop links -->
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#services"    class="text-white/75 hover:text-white text-[13px] font-medium transition-colors">Services</a>
+                <a href="#how-it-works" class="text-white/75 hover:text-white text-[13px] font-medium transition-colors">How It Works</a>
+                <a href="#about"       class="text-white/75 hover:text-white text-[13px] font-medium transition-colors">About</a>
+                <a href="#gallery"     class="text-white/75 hover:text-white text-[13px] font-medium transition-colors">Gallery</a>
+                <a href="#contact"     class="text-white/75 hover:text-white text-[13px] font-medium transition-colors">Contact</a>
+            </div>
+
+            <!-- Desktop CTA -->
+            <div class="hidden md:flex items-center gap-3">
+                <a href="#home" class="text-white/70 text-[13px] font-medium hover:text-white transition-colors">
+                    <i class="fas fa-search-location mr-1.5"></i> Track
+                </a>
+                <a href="#contact" class="relative bg-dhl-red text-white text-[13px] font-bold px-5 py-2.5 rounded-full pulse-ring hover:bg-red-700 transition-colors shadow-lg">
+                    Get Quote
+                </a>
+            </div>
+
+            <!-- Mobile burger -->
+            <button @click="mobileOpen = !mobileOpen" class="md:hidden text-white w-9 h-9 flex items-center justify-center">
+                <i class="fas text-lg" :class="mobileOpen ? 'fa-times' : 'fa-bars'"></i>
+            </button>
+        </div>
+
+        <!-- Mobile drawer -->
+        <div x-show="mobileOpen" x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="md:hidden mt-3 bg-dhl-darker border border-white/10 rounded-2xl p-5">
+            <nav class="flex flex-col gap-1">
+                <a href="#services"    @click="mobileOpen=false" class="text-white/70 hover:text-white py-2.5 px-3 rounded-lg hover:bg-white/5 text-sm font-medium transition-all">Services</a>
+                <a href="#how-it-works" @click="mobileOpen=false" class="text-white/70 hover:text-white py-2.5 px-3 rounded-lg hover:bg-white/5 text-sm font-medium transition-all">How It Works</a>
+                <a href="#about"       @click="mobileOpen=false" class="text-white/70 hover:text-white py-2.5 px-3 rounded-lg hover:bg-white/5 text-sm font-medium transition-all">About</a>
+                <a href="#gallery"     @click="mobileOpen=false" class="text-white/70 hover:text-white py-2.5 px-3 rounded-lg hover:bg-white/5 text-sm font-medium transition-all">Gallery</a>
+                <a href="#contact"     @click="mobileOpen=false" class="text-white/70 hover:text-white py-2.5 px-3 rounded-lg hover:bg-white/5 text-sm font-medium transition-all">Contact</a>
+                <a href="#contact"     @click="mobileOpen=false" class="mt-2 bg-dhl-red text-white text-sm font-bold py-3 rounded-xl text-center hover:bg-red-700 transition-colors">Get Quote</a>
+            </nav>
+        </div>
+    </div>
+</nav>
+
+<!-- ════════════════════════════════ HERO ════════════════════════════════ -->
+<section id="home" class="relative min-h-screen flex items-center overflow-hidden">
+
+    <!-- BG image -->
+    <div class="absolute inset-0">
+        <img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?w=1920&q=80"
+             alt="Container port aerial"
+             class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/40"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+    </div>
+
+    <!-- Ambient blobs -->
+    <div class="absolute top-1/4 right-1/4 w-96 h-96 bg-dhl-red/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-1/3 right-10  w-64 h-64 bg-dhl-yellow/8  rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="relative max-w-7xl mx-auto px-6 pt-28 pb-20 w-full">
+        <div class="grid lg:grid-cols-2 gap-14 items-center">
+
+            <!-- Left: copy -->
+            <div>
+                <div class="anim-badge inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[.2em] text-dhl-yellow bg-dhl-yellow/10 border border-dhl-yellow/25 rounded-full px-4 py-1.5 mb-7">
+                    <span class="w-1.5 h-1.5 rounded-full bg-dhl-yellow animate-pulse"></span>
+                    Worldwide Express Delivery
+                </div>
+
+                <h1 class="anim-h1 text-5xl md:text-6xl xl:text-7xl font-black text-white leading-[1.02] tracking-tight">
+                    Fast. Secure.<br/>
+                    <span class="shimmer-text">Worldwide.</span>
+                </h1>
+
+                <p class="anim-sub text-white/65 mt-6 text-lg leading-relaxed max-w-lg">
+                    Ship anything, anywhere — with real-time tracking, in-house customs handling, and guaranteed door-to-door delivery across 220+ countries.
+                </p>
+
+                <!-- Trust micro-badges -->
+                <div class="anim-trust flex flex-wrap items-center gap-5 mt-7">
+                    <span class="flex items-center gap-2 text-white/55 text-xs font-medium">
+                        <i class="fas fa-shield-alt text-dhl-yellow"></i> Fully Insured
+                    </span>
+                    <span class="flex items-center gap-2 text-white/55 text-xs font-medium">
+                        <i class="fas fa-headset text-dhl-yellow"></i> 24/7 Support
+                    </span>
+                    <span class="flex items-center gap-2 text-white/55 text-xs font-medium">
+                        <i class="fas fa-globe text-dhl-yellow"></i> 220+ Countries
+                    </span>
+                    <span class="flex items-center gap-2 text-white/55 text-xs font-medium">
+                        <i class="fas fa-certificate text-dhl-yellow"></i> ISO Certified
+                    </span>
+                </div>
+
+                <!-- CTA row -->
+                <div class="anim-btns flex flex-wrap gap-4 mt-9">
+                    <a href="#contact"
+                       class="relative bg-dhl-red text-white font-black px-8 py-4 rounded-full text-[15px] hover:bg-red-700 transition-all hover:scale-105 shadow-xl shadow-dhl-red/30">
+                        Ship Now <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="#services"
+                       class="border border-white/30 text-white font-semibold px-8 py-4 rounded-full text-[15px] hover:bg-white/10 transition-all backdrop-blur-sm">
+                        Our Services
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right: tracking widget + floating cards -->
+            <div class="anim-form">
+                <!-- Tracking card -->
+                <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 shadow-2xl">
+                    <div class="flex items-center gap-3 mb-1">
+                        <div class="w-8 h-8 bg-dhl-red rounded-lg flex items-center justify-center">
+                            <i class="fas fa-search text-white text-xs"></i>
+                        </div>
+                        <h3 class="text-white font-bold text-xl">Track Shipment</h3>
+                    </div>
+                    <p class="text-white/45 text-sm mb-6 ml-11">Enter your tracking number for live updates</p>
+
+                    <div class="space-y-3">
+                        <div class="relative">
+                            <input
+                                type="text"
+                                placeholder="e.g. DHL-8824-7719-US"
+                                class="w-full bg-white border border-white/20 text-gray-900 placeholder-gray-400 rounded-xl px-5 py-4 text-sm focus:outline-none focus:border-dhl-yellow transition-colors font-mono pr-12"
+                            />
+                            <i class="fas fa-barcode absolute right-4 top-1/2 -translate-y-1/2 text-white/25"></i>
+                        </div>
+                        <button class="w-full bg-dhl-red text-white font-bold py-4 rounded-xl hover:bg-red-700 transition-all hover:scale-[1.02] text-[15px] shadow-lg shadow-dhl-red/30">
+                            <i class="fas fa-location-arrow mr-2"></i> Track Package
+                        </button>
+                    </div>
+
+                    <div class="mt-5 pt-5 border-t border-white/10 flex items-center justify-between text-xs text-white/35">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                            24,891 shipments in transit
+                        </span>
+                        <span>Live · updates every 2 min</span>
+                    </div>
+                </div>
+
+                <!-- Floating stat chips -->
+                <div class="flex gap-4 mt-4">
+                    <div class="float flex-1 bg-dhl-red/90 backdrop-blur border border-dhl-red text-white rounded-xl p-5 shadow-xl shadow-dhl-red/20">
+                        <div class="text-3xl font-black">99.7%</div>
+                        <div class="text-white/65 text-xs mt-1">On-time delivery</div>
+                    </div>
+                    <div class="float-late flex-1 bg-white/10 backdrop-blur border border-white/20 text-white rounded-xl p-5">
+                        <div class="text-3xl font-black text-dhl-yellow">220+</div>
+                        <div class="text-white/65 text-xs mt-1">Countries served</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll nudge -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/30">
+        <span class="text-[10px] uppercase tracking-[.25em]">Scroll</span>
+        <div class="w-px h-10 bg-gradient-to-b from-white/40 to-transparent scroll-dot"></div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════ SERVICES ════════════════════════════════ -->
+<section id="services" class="py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+
+        <div class="text-center mb-16" data-aos="fade-up">
+            <div class="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[.2em] text-dhl-red bg-red-50 rounded-full px-4 py-1.5 mb-4">
+                <span class="w-1.5 h-1.5 rounded-full bg-dhl-red"></span>
+                What We Offer
+            </div>
+            <h2 class="text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-[1.1]">
+                Shipping Solutions for<br/>
+                <span class="text-dhl-red">Every Need</span>
+            </h2>
+            <p class="text-gray-400 mt-4 max-w-xl mx-auto text-[15px]">
+                From express air freight to ocean consolidation — one platform, one tracking number, complete end-to-end visibility.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+
+            <!-- Air Express -->
+            <div class="svc-card group bg-white border border-gray-100 rounded-2xl p-7 shadow-sm" data-aos="fade-up" data-aos-delay="0">
+                <div class="w-14 h-14 bg-red-50 group-hover:bg-dhl-red rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300">
+                    <i class="fas fa-plane text-dhl-red group-hover:text-white text-2xl transition-colors duration-300"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 text-[17px] mb-2">Air Express</h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-5">Next-flight-out uplift with priority handling and door-to-door delivery in 1–3 business days.</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-mono font-bold text-dhl-red">1–3 days</span>
+                    <span class="w-7 h-7 bg-red-50 group-hover:bg-dhl-red rounded-lg flex items-center justify-center transition-colors duration-300">
+                        <i class="fas fa-arrow-right text-dhl-red group-hover:text-white text-xs transition-colors duration-300"></i>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Ocean Freight -->
+            <div class="svc-card group bg-white border border-gray-100 rounded-2xl p-7 shadow-sm" data-aos="fade-up" data-aos-delay="80">
+                <div class="w-14 h-14 bg-blue-50 group-hover:bg-blue-600 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300">
+                    <i class="fas fa-ship text-blue-600 group-hover:text-white text-2xl transition-colors duration-300"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 text-[17px] mb-2">Ocean Freight</h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-5">Full container or consolidated LCL with customs brokerage and port-to-port handling included.</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-mono font-bold text-blue-600">14–30 days</span>
+                    <span class="w-7 h-7 bg-blue-50 group-hover:bg-blue-600 rounded-lg flex items-center justify-center transition-colors duration-300">
+                        <i class="fas fa-arrow-right text-blue-600 group-hover:text-white text-xs transition-colors duration-300"></i>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Road Freight -->
+            <div class="svc-card group bg-white border border-gray-100 rounded-2xl p-7 shadow-sm" data-aos="fade-up" data-aos-delay="160">
+                <div class="w-14 h-14 bg-yellow-50 group-hover:bg-dhl-yellow rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300">
+                    <i class="fas fa-truck text-yellow-500 group-hover:text-gray-900 text-2xl transition-colors duration-300"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 text-[17px] mb-2">Road Freight</h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-5">Bonded cross-border road freight with a single carrier of record and border pre-clearance filing.</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-mono font-bold text-yellow-500">2–6 days</span>
+                    <span class="w-7 h-7 bg-yellow-50 group-hover:bg-dhl-yellow rounded-lg flex items-center justify-center transition-colors duration-300">
+                        <i class="fas fa-arrow-right text-yellow-500 group-hover:text-gray-900 text-xs transition-colors duration-300"></i>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Warehousing -->
+            <div class="svc-card group bg-white border border-gray-100 rounded-2xl p-7 shadow-sm" data-aos="fade-up" data-aos-delay="240">
+                <div class="w-14 h-14 bg-green-50 group-hover:bg-green-600 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300">
+                    <i class="fas fa-warehouse text-green-600 group-hover:text-white text-2xl transition-colors duration-300"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 text-[17px] mb-2">Warehousing</h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-5">Bonded storage at regional hubs with inventory management, pick & pack and same-day dispatch.</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-mono font-bold text-green-600">Flexible</span>
+                    <span class="w-7 h-7 bg-green-50 group-hover:bg-green-600 rounded-lg flex items-center justify-center transition-colors duration-300">
+                        <i class="fas fa-arrow-right text-green-600 group-hover:text-white text-xs transition-colors duration-300"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════ STATS STRIP ════════════════════════════════ -->
+<section class="bg-dhl-dark py-16">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div data-aos="fade-up" data-aos-delay="0">
+                <div class="counter-glow text-5xl font-black text-dhl-yellow font-mono">220+</div>
+                <div class="text-white/45 text-[10px] uppercase tracking-[.22em] mt-2">Countries Served</div>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="80">
+                <div class="counter-glow text-5xl font-black text-white font-mono">50K+</div>
+                <div class="text-white/45 text-[10px] uppercase tracking-[.22em] mt-2">Monthly Shipments</div>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="160">
+                <div class="counter-glow text-5xl font-black text-dhl-yellow font-mono">99.7%</div>
+                <div class="text-white/45 text-[10px] uppercase tracking-[.22em] mt-2">On-Time Delivery</div>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="240">
+                <div class="counter-glow text-5xl font-black text-white font-mono">24/7</div>
+                <div class="text-white/45 text-[10px] uppercase tracking-[.22em] mt-2">Live Support</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════ HOW IT WORKS ════════════════════════════════ -->
+<section id="how-it-works" class="py-24 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-6">
+
+        <div class="text-center mb-16" data-aos="fade-up">
+            <div class="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[.2em] text-dhl-red bg-red-50 rounded-full px-4 py-1.5 mb-4">
+                <span class="w-1.5 h-1.5 rounded-full bg-dhl-red"></span>
+                Simple Process
+            </div>
+            <h2 class="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
+                Ship in <span class="text-dhl-red">4 Easy Steps</span>
+            </h2>
+            <p class="text-gray-400 mt-4 max-w-lg mx-auto text-[15px]">
+                From booking to doorstep — the whole journey handled under one tracking number.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-8 relative">
+            <!-- Connector line (desktop) -->
+            <div class="hidden md:block absolute top-10 left-[calc(12.5%+20px)] right-[calc(12.5%+20px)] h-0.5 bg-gradient-to-r from-dhl-red via-dhl-yellow to-dhl-red opacity-20"></div>
+
+            <!-- Step 1 -->
+            <div class="text-center" data-aos="fade-up" data-aos-delay="0">
+                <div class="relative inline-block mb-6">
+                    <div class="w-20 h-20 bg-dhl-red rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-dhl-red/25 transition-transform hover:scale-105">
+                        <i class="fas fa-clipboard-list text-white text-2xl"></i>
+                    </div>
+                    <span class="absolute -top-2 -right-2 w-7 h-7 bg-dhl-yellow text-gray-900 text-xs font-black rounded-full flex items-center justify-center shadow">1</span>
+                </div>
+                <h3 class="font-bold text-gray-900 text-[17px] mb-2">Book Online</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Enter shipment details, get an instant quote, and confirm in under 2 minutes.</p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="text-center" data-aos="fade-up" data-aos-delay="100">
+                <div class="relative inline-block mb-6">
+                    <div class="w-20 h-20 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto transition-transform hover:scale-105">
+                        <i class="fas fa-print text-white text-2xl"></i>
+                    </div>
+                    <span class="absolute -top-2 -right-2 w-7 h-7 bg-dhl-yellow text-gray-900 text-xs font-black rounded-full flex items-center justify-center shadow">2</span>
+                </div>
+                <h3 class="font-bold text-gray-900 text-[17px] mb-2">Print Label</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Receive your airway bill and customs documents instantly. Pack and attach the label.</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="text-center" data-aos="fade-up" data-aos-delay="200">
+                <div class="relative inline-block mb-6">
+                    <div class="w-20 h-20 bg-dhl-red rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-dhl-red/25 transition-transform hover:scale-105">
+                        <i class="fas fa-shipping-fast text-white text-2xl"></i>
+                    </div>
+                    <span class="absolute -top-2 -right-2 w-7 h-7 bg-dhl-yellow text-gray-900 text-xs font-black rounded-full flex items-center justify-center shadow">3</span>
+                </div>
+                <h3 class="font-bold text-gray-900 text-[17px] mb-2">We Collect</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Schedule a pickup or drop off at any of our 500+ service points. We handle the rest.</p>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="text-center" data-aos="fade-up" data-aos-delay="300">
+                <div class="relative inline-block mb-6">
+                    <div class="w-20 h-20 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto transition-transform hover:scale-105">
+                        <i class="fas fa-check-circle text-white text-2xl"></i>
+                    </div>
+                    <span class="absolute -top-2 -right-2 w-7 h-7 bg-dhl-yellow text-gray-900 text-xs font-black rounded-full flex items-center justify-center shadow">4</span>
+                </div>
+                <h3 class="font-bold text-gray-900 text-[17px] mb-2">Delivered</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Track every milestone in real time. Recipient signs, you get instant confirmation.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════ ABOUT / WHY US ════════════════════════════════ -->
+<section id="about" class="py-24 bg-white overflow-hidden">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+            <!-- Image block -->
+            <div class="relative" data-aos="fade-right">
+                <div class="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/3]">
+                    <img
+                        src="https://images.unsplash.com/photo-1553413077-190dd305871c?w=900&q=80"
+                        alt="Cargo warehouse operations"
+                        class="w-full h-full object-cover"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                </div>
+
+                <!-- Floating badge — experience -->
+                <div class="float absolute -bottom-6 -right-4 bg-dhl-red text-white rounded-2xl p-6 shadow-2xl shadow-dhl-red/30">
+                    <div class="text-4xl font-black leading-none">15+</div>
+                    <div class="text-white/65 text-xs mt-1">Years Experience</div>
+                </div>
+
+                <!-- Floating badge — certified -->
+                <div class="float-late absolute -top-5 -left-4 bg-dhl-yellow text-gray-900 rounded-2xl p-5 shadow-xl">
+                    <i class="fas fa-award text-2xl"></i>
+                    <div class="text-xs font-bold mt-1.5">ISO 9001 Certified</div>
+                </div>
+            </div>
+
+            <!-- Text block -->
+            <div data-aos="fade-left">
+                <div class="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[.2em] text-dhl-red bg-red-50 rounded-full px-4 py-1.5 mb-6">
+                    <span class="w-1.5 h-1.5 rounded-full bg-dhl-red"></span>
+                    Why Cargo DHL
+                </div>
+                <h2 class="text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-[1.08] mb-5">
+                    Your Cargo is Our<br/>
+                    <span class="text-dhl-red">Commitment</span>
+                </h2>
+                <p class="text-gray-400 text-[15px] leading-relaxed mb-9">
+                    We combine global reach with local expertise. From customs brokerage to last-mile delivery,
+                    every shipment is handled by trained professionals who treat your goods with the same care they'd give their own.
+                </p>
+
+                <div class="space-y-6">
+                    <div class="flex gap-4 items-start">
+                        <div class="w-11 h-11 bg-red-50 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+                            <i class="fas fa-map-marked-alt text-dhl-red"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-1">Real-Time Tracking</h4>
+                            <p class="text-gray-400 text-sm leading-relaxed">Every scan, every checkpoint — visible to you and your recipient the moment it happens. No black holes.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 items-start">
+                        <div class="w-11 h-11 bg-red-50 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+                            <i class="fas fa-file-contract text-dhl-red"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-1">Customs Handled In-House</h4>
+                            <p class="text-gray-400 text-sm leading-relaxed">Licensed brokers at every destination. Duties calculated and filed before your shipment arrives at the border.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 items-start">
+                        <div class="w-11 h-11 bg-red-50 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+                            <i class="fas fa-shield-alt text-dhl-red"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-1">All-Risk Insurance</h4>
+                            <p class="text-gray-400 text-sm leading-relaxed">Full declared-value cover from our pickup scan through to proof-of-delivery signature.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════ CARGO IMAGE GALLERY ════════════════════════════════ -->
+<section id="gallery" class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-6">
+
+        <div class="text-center mb-12" data-aos="fade-up">
+            <h2 class="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
+                Moving Cargo <span class="text-dhl-red">Around the Globe</span>
+            </h2>
+            <p class="text-gray-400 mt-3 text-sm">Air · Sea · Road · Rail — complete multimodal coverage</p>
+        </div>
+
+        <!-- Main grid -->
+        <div class="grid grid-cols-12 gap-4" data-aos="fade-up" data-aos-delay="100">
+
+            <!-- Big left image -->
+            <div class="col-span-12 md:col-span-7 gallery-wrap relative overflow-hidden rounded-2xl group cursor-pointer h-72 md:h-96">
+                <img
+                    src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=900&q=80"
+                    alt="Container ship"
+                    class="gallery-img w-full h-full object-cover"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent flex items-end p-6">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-[.2em] text-dhl-yellow">Ocean Freight</span>
+                        <div class="text-white font-bold text-xl mt-1">Full Container & LCL</div>
+                    </div>
+                </div>
+                <div class="absolute top-4 right-4 bg-dhl-red text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    View Service →
+                </div>
+            </div>
+
+            <!-- Right column: stacked -->
+            <div class="col-span-12 md:col-span-5 flex flex-col gap-4">
+                <div class="gallery-wrap relative overflow-hidden rounded-2xl group cursor-pointer flex-1" style="min-height: 175px;">
+                    <img
+                        src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=700&q=80"
+                        alt="Air cargo"
+                        class="gallery-img w-full h-full object-cover"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent flex items-end p-5">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-[.2em] text-dhl-yellow">Air Express</span>
+                            <div class="text-white font-bold text-lg mt-0.5">Priority & Economy</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-wrap relative overflow-hidden rounded-2xl group cursor-pointer flex-1" style="min-height: 175px;">
+                    <img
+                        src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=700&q=80"
+                        alt="Road freight truck"
+                        class="gallery-img w-full h-full object-cover"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent flex items-end p-5">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-[.2em] text-dhl-yellow">Road Freight</span>
+                            <div class="text-white font-bold text-lg mt-0.5">Cross-Border Ground</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom row: 3 equal -->
+            <div class="col-span-12 md:col-span-4 gallery-wrap relative overflow-hidden rounded-2xl group cursor-pointer h-48">
+                <img
+                    src="https://images.unsplash.com/photo-1553413077-190dd305871c?w=600&q=80"
+                    alt="Warehouse"
+                    class="gallery-img w-full h-full object-cover"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-5">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-dhl-yellow">Warehousing</span>
+                        <div class="text-white font-bold mt-0.5">Bonded Storage</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12 md:col-span-4 gallery-wrap relative overflow-hidden rounded-2xl group cursor-pointer h-48">
+                <img
+                    src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80"
+                    alt="Customs clearance"
+                    class="gallery-img w-full h-full object-cover"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-5">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-dhl-yellow">Customs</span>
+                        <div class="text-white font-bold mt-0.5">Licensed Brokerage</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12 md:col-span-4 gallery-wrap relative overflow-hidden rounded-2xl group cursor-pointer h-48">
+                <img
+                    src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&q=80"
+                    alt="Cargo terminal"
+                    class="gallery-img w-full h-full object-cover"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-5">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-dhl-yellow">Terminals</span>
+                        <div class="text-white font-bold mt-0.5">9 Bonded Hubs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════ TESTIMONIALS ════════════════════════════════ -->
+<section id="testimonials" class="py-24 bg-dhl-dark">
+    <div class="max-w-7xl mx-auto px-6">
+
+        <div class="text-center mb-16" data-aos="fade-up">
+            <div class="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[.2em] text-dhl-yellow bg-dhl-yellow/10 border border-dhl-yellow/20 rounded-full px-4 py-1.5 mb-4">
+                <span class="w-1.5 h-1.5 rounded-full bg-dhl-yellow animate-pulse"></span>
+                Client Stories
+            </div>
+            <h2 class="text-4xl md:text-5xl font-black text-white tracking-tight">
+                Trusted by <span class="text-dhl-yellow">Thousands</span>
+            </h2>
+            <p class="text-white/40 mt-4 max-w-xl mx-auto text-[15px]">
+                Businesses and individuals across the globe rely on Cargo DHL every day.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-5">
+            <div class="bg-white/5 border border-white/8 rounded-2xl p-7 hover:border-white/20 transition-colors" data-aos="fade-up" data-aos-delay="0">
+                <div class="flex gap-1 mb-5">
+                    <i class="fas fa-star text-dhl-yellow text-sm"></i>
+                    <i class="fas fa-star text-dhl-yellow text-sm"></i>
+                    <i class="fas fa-star text-dhl-yellow text-sm"></i>
+                    <i class="fas fa-star text-dhl-yellow text-sm"></i>
+                    <i class="fas fa-star text-dhl-yellow text-sm"></i>
+                </div>
+                <p class="text-white/65 text-sm leading-relaxed mb-7">
+                    "Cargo DHL handled our entire product launch across 12 countries. Real-time tracking and zero customs delays. Genuinely exceptional."
+                </p>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-dhl-red rounded-full flex items-center justify-center text-white font-black text-sm">SK</div>
+                    <div>
+                        <div class="text-white font-semibold text-sm">Sarah K.</div>
+                        <div class="text-white/35 text-xs">Operations Director, TechFlow Inc.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/5 border border-white/8 rounded-2xl p-7 hover:border-white/20 transition-colors" data-aos="fade-up" data-aos-delay="100">
+                <div class="flex gap-1 mb-5">
+                    <i class="fas fa-star text-dhl-yellow text-sm"></i>
+                    <i class="fas fa-star text-dhl-yellow text-sm"></i>
+                    <i class="fas fa-star text-dhl-yellow text-sm"></i>
+                    <i class="fas fa-star text-dhl-yellow text-sm"></i>
+                    <i class="fas fa-star text-dhl-yellow text-sm"></i>
+                </div>
+                <p class="text-white/65 text-sm leading-relaxed mb-7">
+                    "We've moved 3,000+ units with Cargo DHL. The bonded warehousing saved us weeks on our Q4 distribution cycle. Highly recommend to any brand scaling globally."
+                </p>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-black text-sm">MB</div>
+                    <div>
+                        <div class="text-white font-semibold text-sm">Marcus B.</div>
+                        <div class="text-white/35 text-xs">Logistics Manager, NordRetail</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/5 border border-white/8 rounded-2xl p-7 hover:border-white/20 transition-colors" data-aos="fade-up" data-aos-delay="200">
+                <div class="flex gap-1 mb-5">
+                    <i class="fas fa-star text-dhl-yellow text-sm"></i>
+                    <i class="fas fa-star text-dhl-yellow text-sm"></i>
+                    <i class="fas fa-star text-dhl-yellow text-sm"></i>
+                    <i class="fas fa-star text-dhl-yellow text-sm"></i>
+                    <i class="fas fa-star-half-alt text-dhl-yellow text-sm"></i>
+                </div>
+                <p class="text-white/65 text-sm leading-relaxed mb-7">
+                    "The customs brokerage team is phenomenal. They handled our pharmaceutical imports without a single delay. The tracking portal is best-in-class."
+                </p>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-black text-sm">AL</div>
+                    <div>
+                        <div class="text-white font-semibold text-sm">Aiko L.</div>
+                        <div class="text-white/35 text-xs">Supply Chain VP, MediSource</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════ CTA BANNER ════════════════════════════════ -->
+<section id="contact" class="relative py-28 overflow-hidden">
+    <div class="absolute inset-0">
+        <img
+            src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1920&q=80"
+            alt="Cargo terminal at dusk"
+            class="w-full h-full object-cover"
+        />
+        <div class="absolute inset-0 bg-dhl-red/88"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-dhl-red/20 to-black/40"></div>
+    </div>
+
+    <div class="relative max-w-4xl mx-auto px-6 text-center" data-aos="fade-up">
+        <div class="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[.22em] text-white/70 border border-white/25 rounded-full px-4 py-1.5 mb-7">
+            <span class="w-1.5 h-1.5 rounded-full bg-white/70 animate-pulse"></span>
+            Ready to Start?
+        </div>
+        <h2 class="text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.02] mb-6">
+            Ship Worldwide.<br/>
+            <span class="text-dhl-yellow">Start Today.</span>
+        </h2>
+        <p class="text-white/75 text-lg mb-10 max-w-xl mx-auto">
+            Get an instant quote in under 60 seconds. No account needed to start — just enter your shipment details.
+        </p>
+        <div class="flex flex-wrap gap-4 justify-center">
+            <a href="#home"
+               class="bg-white text-dhl-red font-black px-10 py-5 rounded-full text-lg hover:bg-dhl-yellow hover:text-gray-900 transition-all hover:scale-105 shadow-2xl shadow-black/30">
+                Get Instant Quote
+            </a>
+            <a href="tel:+18001234567"
+               class="border-2 border-white/40 text-white font-bold px-10 py-5 rounded-full text-lg hover:bg-white/10 transition-all backdrop-blur-sm">
+                <i class="fas fa-phone mr-2"></i> Call Us
+            </a>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-8 mt-14 pt-14 border-t border-white/15">
+            <div class="flex items-center gap-2 text-white/55 text-sm">
+                <i class="fas fa-lock text-white/40"></i> Secure Payments
+            </div>
+            <div class="flex items-center gap-2 text-white/55 text-sm">
+                <i class="fas fa-undo text-white/40"></i> Money-Back Guarantee
+            </div>
+            <div class="flex items-center gap-2 text-white/55 text-sm">
+                <i class="fas fa-headset text-white/40"></i> 24/7 Expert Support
+            </div>
+            <div class="flex items-center gap-2 text-white/55 text-sm">
+                <i class="fas fa-certificate text-white/40"></i> ISO 9001 Certified
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════ FOOTER ════════════════════════════════ -->
+<footer class="bg-dhl-darker text-white pt-16 pb-8">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid md:grid-cols-4 gap-10 mb-12">
+
+            <!-- Brand col -->
+            <div>
+                <div class="flex items-center gap-2.5 mb-5">
+                    <div class="w-9 h-9 bg-dhl-red rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-shipping-fast text-white text-sm"></i>
+                    </div>
+                    <span class="font-black text-lg">CARGO <span class="text-dhl-yellow">DHL</span></span>
+                </div>
+                <p class="text-white/40 text-sm leading-relaxed mb-6">
+                    Global shipping and logistics for businesses and individuals across 220+ countries and territories.
+                </p>
+                <div class="flex gap-2.5">
+                    <a href="#" class="w-9 h-9 bg-white/5 rounded-xl flex items-center justify-center hover:bg-dhl-red transition-colors">
+                        <i class="fab fa-twitter text-[13px] text-white/55"></i>
+                    </a>
+                    <a href="#" class="w-9 h-9 bg-white/5 rounded-xl flex items-center justify-center hover:bg-dhl-red transition-colors">
+                        <i class="fab fa-linkedin-in text-[13px] text-white/55"></i>
+                    </a>
+                    <a href="#" class="w-9 h-9 bg-white/5 rounded-xl flex items-center justify-center hover:bg-dhl-red transition-colors">
+                        <i class="fab fa-instagram text-[13px] text-white/55"></i>
+                    </a>
+                    <a href="#" class="w-9 h-9 bg-white/5 rounded-xl flex items-center justify-center hover:bg-dhl-red transition-colors">
+                        <i class="fab fa-facebook-f text-[13px] text-white/55"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Services -->
+            <div>
+                <h4 class="text-[11px] font-bold uppercase tracking-[.22em] text-white/35 mb-5">Services</h4>
+                <ul class="space-y-3 text-sm text-white/50">
+                    <li><a href="#services" class="hover:text-white transition-colors">Air Express</a></li>
+                    <li><a href="#services" class="hover:text-white transition-colors">Ocean Freight</a></li>
+                    <li><a href="#services" class="hover:text-white transition-colors">Road Freight</a></li>
+                    <li><a href="#services" class="hover:text-white transition-colors">Warehousing</a></li>
+                    <li><a href="#services" class="hover:text-white transition-colors">Customs Brokerage</a></li>
+                </ul>
+            </div>
+
+            <!-- Company -->
+            <div>
+                <h4 class="text-[11px] font-bold uppercase tracking-[.22em] text-white/35 mb-5">Company</h4>
+                <ul class="space-y-3 text-sm text-white/50">
+                    <li><a href="#about" class="hover:text-white transition-colors">About Us</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">News & Insights</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Sustainability</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Investor Relations</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact -->
+            <div>
+                <h4 class="text-[11px] font-bold uppercase tracking-[.22em] text-white/35 mb-5">Contact</h4>
+                <ul class="space-y-4 text-sm text-white/50">
+                    <li class="flex gap-3 items-start">
+                        <i class="fas fa-phone text-dhl-red mt-0.5 shrink-0"></i>
+                        <span>+1 800 123 4567</span>
+                    </li>
+                    <li class="flex gap-3 items-start">
+                        <i class="fas fa-envelope text-dhl-red mt-0.5 shrink-0"></i>
+                        <span>support@cargodhl.com</span>
+                    </li>
+                    <li class="flex gap-3 items-start">
+                        <i class="fas fa-map-marker-alt text-dhl-red mt-0.5 shrink-0"></i>
+                        <span>53 Logistics Way,<br/>Frankfurt, DE 60549</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="border-t border-white/8 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-[13px] text-white/30">
+            <span>© 2026 Cargo DHL. All rights reserved.</span>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-white/60 transition-colors">Privacy Policy</a>
+                <a href="#" class="hover:text-white/60 transition-colors">Terms of Service</a>
+                <a href="#" class="hover:text-white/60 transition-colors">Cookie Policy</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- ════════════════════════════════ SCRIPTS ════════════════════════════════ -->
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script>
+    // AOS init
+    AOS.init({
+        duration: 700,
+        once: true,
+        easing: 'ease-out-cubic',
+        offset: 70,
+    });
+
+    // Navbar solidify on scroll
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('nav-solid', window.scrollY > 60);
+    }, { passive: true });
+</script>
+</body>
+</html>
