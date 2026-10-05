@@ -329,9 +329,9 @@ export default function AdminShipments() {
 
       {/* Shipment Edit/Create Modal */}
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-8 overflow-y-auto">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setModal(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 my-4">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-bold text-slate-900 text-lg">{editingId ? 'Edit Shipment' : 'New Shipment'}</h3>
               <button onClick={() => setModal(false)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
