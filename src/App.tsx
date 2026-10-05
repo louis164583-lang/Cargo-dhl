@@ -4,7 +4,6 @@ import TrackPage from './pages/Track';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminShipments from './pages/admin/AdminShipments';
-import AdminClients from './pages/admin/AdminClients';
 import AdminCharges from './pages/admin/AdminCharges';
 import ContactPage from './pages/Contact';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -31,14 +30,6 @@ export default function App() {
           element={
             <ProtectedRoute>
               <AdminShipments />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/clients"
-          element={
-            <ProtectedRoute>
-              <AdminClients />
             </ProtectedRoute>
           }
         />
