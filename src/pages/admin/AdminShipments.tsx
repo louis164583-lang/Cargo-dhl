@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { getShipments, saveShipment, removeShipment, STATUS_LABELS, STATUS_COLORS, type Shipment, type ShipmentStatus, type PendingCharge } from '@/lib/shipments';
+import { getShipments, saveShipment, removeShipment, replaceAllShipments, STATUS_LABELS, STATUS_COLORS, type Shipment, type ShipmentStatus, type PendingCharge } from '@/lib/shipments';
 import { getCharges, getChargeById, formatFee, type ChargeableStatus } from '@/lib/charges';
 import { Search, Plus, X, Filter, DollarSign, CheckCircle2, AlertCircle, Trash2, ChevronDown } from 'lucide-react';
 
@@ -128,7 +128,7 @@ export default function AdminShipments() {
     const updated = editingId
       ? shipments.map(s => s.id === editingId ? { ...s, ...form } : s)
       : [{ ...form } as Shipment, ...shipments];
-    updated.forEach(s => saveShipment(s));
+    replaceAllShipments(updated);
     setShipments(updated);
     setModal(false);
   }

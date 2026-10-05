@@ -81,6 +81,10 @@ export function saveShipment(s: Shipment): void {
   persistShipments(all);
 }
 
+export function replaceAllShipments(data: Shipment[]): void {
+  persistShipments(data);
+}
+
 export function removeShipment(id: string): void {
   persistShipments(loadShipments().filter(s => s.id !== id));
 }
