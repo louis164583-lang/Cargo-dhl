@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Poppins', sans-serif; }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: #111; }
+  ::-webkit-scrollbar-thumb { background: #D40511; border-radius: 4px; }
+}
+
+@layer utilities {
+  .shimmer-text {
+    background: linear-gradient(90deg, #D40511 0%, #FFCC00 40%, #D40511 60%, #FFCC00 100%);
+    background-size: 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 4s linear infinite;
+  }
+
+  .gallery-img {
+    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .gallery-wrap:hover .gallery-img {
+    transform: scale(1.08);
+  }
+
+  .counter-glow {
+    text-shadow: 0 0 40px rgba(255, 204, 0, 0.25);
+  }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
