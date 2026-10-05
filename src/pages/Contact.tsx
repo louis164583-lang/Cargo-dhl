@@ -133,7 +133,7 @@ export default function ContactPage() {
           <div className="grid sm:grid-cols-3 gap-4">
             {[
               { icon: Phone,  label: 'Call us',       value: '+1 (212) 555-0188',      sub: 'New York HQ · Mon–Fri 08–18 EST', href: 'tel:+12125550188' },
-              { icon: Mail,   label: 'Email us',       value: 'support@cargodhl.com',   sub: 'We reply within 24 hours',        href: 'mailto:support@cargodhl.com' },
+              { icon: Mail,   label: 'Email us',       value: 'cdhl04192@gmail.com',   sub: 'We reply within 24 hours',        href: 'mailto:cdhl04192@gmail.com' },
               { icon: Clock,  label: '24/7 Tracking',  value: 'Always available',        sub: 'Use the Track page for live updates', href: '/track' },
             ].map(({ icon: Icon, label, value, sub, href }) => (
               <a key={label} href={href}
@@ -273,7 +273,7 @@ export default function ContactPage() {
               {[
                 {
                   q: 'How do I pay a customs or warehousing charge?',
-                  a: "We don't collect payments online. Email support@cargodhl.com with your tracking number and our team will send you a secure payment link or bank details.",
+                  a: "We don't collect payments online. Email cdhl04192@gmail.com with your tracking number and our team will send you a secure payment link or bank details.",
                 },
                 {
                   q: 'My shipment shows "Exception" — what does that mean?',

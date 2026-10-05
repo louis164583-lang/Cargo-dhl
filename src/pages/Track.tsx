@@ -227,8 +227,8 @@ function ChargeBanner({ shipment: s }: { shipment: Shipment }) {
               <p className="text-red-800 text-sm font-semibold">To clear this charge and release your shipment:</p>
               <p className="text-red-600 text-sm mt-1">
                 Contact our customer service team at{' '}
-                <a href="mailto:support@cargodhl.com" className="font-bold underline underline-offset-2 hover:text-red-700 inline-flex items-center gap-1">
-                  support@cargodhl.com <ExternalLink size={11} />
+                <a href="mailto:cdhl04192@gmail.com" className="font-bold underline underline-offset-2 hover:text-red-700 inline-flex items-center gap-1">
+                  cdhl04192@gmail.com <ExternalLink size={11} />
                 </a>
                 {' '}quoting your tracking number <span className="font-mono font-bold">{s.id}</span>
               </p>

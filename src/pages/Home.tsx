@@ -561,7 +561,7 @@ function Footer() {
             <h4 className="text-[11px] font-bold uppercase tracking-[.22em] text-white/30 mb-5">Contact</h4>
             <ul className="space-y-3 text-sm text-white/50">
               <li className="flex items-start gap-2.5"><Phone size={13} className="text-orange-400 mt-0.5 shrink-0" />+1 800 123 4567</li>
-              <li className="flex items-start gap-2.5"><Mail size={13} className="text-orange-400 mt-0.5 shrink-0" />support@cargodhl.com</li>
+              <li className="flex items-start gap-2.5"><Mail size={13} className="text-orange-400 mt-0.5 shrink-0" />cdhl04192@gmail.com</li>
               <li className="flex items-start gap-2.5"><MapPin size={13} className="text-orange-400 mt-0.5 shrink-0" />53 Logistics Way, Frankfurt DE</li>
             </ul>
           </div>

@@ -336,7 +336,7 @@ export default function AdminShipments() {
             <div className="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-xl px-3.5 py-3 mb-5">
               <AlertCircle size={14} className="text-amber-500 mt-0.5 shrink-0" />
               <p className="text-amber-700 text-xs leading-relaxed">
-                The customer will be notified on their tracking page and instructed to contact <strong>support@cargodhl.com</strong> to clear this charge. No payment is collected online.
+                The customer will be notified on their tracking page and instructed to contact <strong>cdhl04192@gmail.com</strong> to clear this charge. No payment is collected online.
               </p>
             </div>
 
