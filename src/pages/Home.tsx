@@ -37,7 +37,7 @@ function Navbar() {
     { label: 'Home', href: '#home' },
     { label: 'Services', href: '#services' },
     { label: 'About', href: '#about' },
-    { label: 'Contact', href: '#contact' },
+    { label: 'Contact', href: '/contact' },
   ];
 
   return (
@@ -51,7 +51,9 @@ function Navbar() {
         </a>
 
         <div className="hidden md:flex items-center gap-8">
-          {links.map(l => (
+          {links.map(l => l.href.startsWith('/') ? (
+            <Link key={l.label} to={l.href} className="text-white/70 hover:text-white text-sm font-medium transition-colors">{l.label}</Link>
+          ) : (
             <a key={l.label} href={l.href} className="text-white/70 hover:text-white text-sm font-medium transition-colors">{l.label}</a>
           ))}
         </div>
@@ -74,7 +76,12 @@ function Navbar() {
             initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
             className="md:hidden bg-slate-900 border-t border-white/10 px-6 py-4 space-y-1"
           >
-            {links.map(l => (
+            {links.map(l => l.href.startsWith('/') ? (
+              <Link key={l.label} to={l.href} onClick={() => setOpen(false)}
+                className="block py-2.5 px-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 text-sm font-medium">
+                {l.label}
+              </Link>
+            ) : (
               <a key={l.label} href={l.href} onClick={() => setOpen(false)}
                 className="block py-2.5 px-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 text-sm font-medium">
                 {l.label}

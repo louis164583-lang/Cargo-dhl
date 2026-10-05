@@ -6,6 +6,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminShipments from './pages/admin/AdminShipments';
 import AdminClients from './pages/admin/AdminClients';
 import AdminCharges from './pages/admin/AdminCharges';
+import ContactPage from './pages/Contact';
 import ProtectedRoute from './components/ProtectedRoute';
 
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/track" element={<TrackPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/track/:id" element={<TrackPage />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route
