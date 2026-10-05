@@ -2,7 +2,71 @@ import { useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { getShipments, saveShipment, removeShipment, STATUS_LABELS, STATUS_COLORS, type Shipment, type ShipmentStatus, type PendingCharge } from '@/lib/shipments';
 import { getCharges, getChargeById, formatFee, type ChargeableStatus } from '@/lib/charges';
-import { Search, Plus, X, Filter, DollarSign, CheckCircle2, AlertCircle, Trash2 } from 'lucide-react';
+import { Search, Plus, X, Filter, DollarSign, CheckCircle2, AlertCircle, Trash2, ChevronDown } from 'lucide-react';
+
+const LOCATIONS = [
+  'New York',
+  'London',
+  'Dubai',
+  'Lagos',
+  'Frankfurt',
+  'Paris',
+  'Amsterdam',
+  'Singapore',
+  'Hong Kong',
+  'Shanghai',
+  'Tokyo',
+  'Sydney',
+  'Toronto',
+  'Los Angeles',
+  'Chicago',
+  'Nairobi',
+  'Johannesburg',
+  'Cairo',
+  'Istanbul',
+  'Mumbai',
+];
+
+function LocationField({
+  label, value, onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+}) {
+  const isCustom = value !== '' && !LOCATIONS.includes(value);
+  const selectVal = isCustom ? '__custom__' : value;
+
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">{label}</label>
+      <div className="relative mb-2">
+        <select
+          value={selectVal}
+          onChange={e => {
+            if (e.target.value === '__custom__') onChange('');
+            else onChange(e.target.value);
+          }}
+          className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/30 appearance-none bg-white"
+        >
+          <option value="">— Select city —</option>
+          {LOCATIONS.map(l => <option key={l} value={l}>{l}</option>)}
+          <option value="__custom__">Custom…</option>
+        </select>
+        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+      </div>
+      {(selectVal === '__custom__' || isCustom) && (
+        <input
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder="Type city or country…"
+          autoFocus
+          className="w-full border border-orange-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/30"
+        />
+      )}
+    </div>
+  );
+}
 
 const STATUS_OPTIONS: ShipmentStatus[] = ['pending', 'in_transit', 'customs', 'delivered', 'exception'];
 
@@ -273,8 +337,6 @@ export default function AdminShipments() {
                 { label: 'Tracking ID', key: 'id', type: 'text', disabled: !!editingId },
                 { label: 'Client Name', key: 'client', type: 'text' },
                 { label: 'Client Email', key: 'clientEmail', type: 'email', full: true },
-                { label: 'Origin', key: 'origin', type: 'text' },
-                { label: 'Destination', key: 'destination', type: 'text' },
                 { label: 'Weight', key: 'weight', type: 'text' },
                 { label: 'Ship Date', key: 'date', type: 'date' },
                 { label: 'ETA', key: 'eta', type: 'date' },
@@ -290,6 +352,8 @@ export default function AdminShipments() {
                   />
                 </div>
               ))}
+              <LocationField label="Origin" value={form.origin} onChange={v => setForm(p => ({ ...p, origin: v }))} />
+              <LocationField label="Destination" value={form.destination} onChange={v => setForm(p => ({ ...p, destination: v }))} />
               <div>
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Service</label>
                 <select value={form.service} onChange={e => setForm(p => ({ ...p, service: e.target.value as Shipment['service'] }))}
