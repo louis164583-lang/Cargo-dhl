@@ -1,12 +1,21 @@
+import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { getShipments, STATUS_LABELS, STATUS_COLORS } from '@/lib/shipments';
-import { getCharges } from '@/lib/charges';
-import { Package, TrendingUp, CheckCircle, AlertCircle, DollarSign, ArrowRight, Clock } from 'lucide-react';
+import { STATUS_LABELS, STATUS_COLORS, type Shipment } from '@/lib/shipments';
+import { type ChargeableStatus } from '@/lib/charges';
+import { shipmentApi, chargeApi } from '@/lib/api';
+import { Package, TrendingUp, CheckCircle, AlertCircle, DollarSign, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function AdminDashboard() {
-  const shipments = getShipments();
-  const charges = getCharges();
+  const [shipments, setShipments] = useState<Shipment[]>([]);
+  const [charges, setCharges] = useState<ChargeableStatus[]>([]);
+
+  useEffect(() => {
+    Promise.all([shipmentApi.list(), chargeApi.list()]).then(([s, c]) => {
+      setShipments(s);
+      setCharges(c);
+    });
+  }, []);
 
   const total      = shipments.length;
   const inTransit  = shipments.filter(s => s.status === 'in_transit').length;
@@ -15,41 +24,18 @@ export default function AdminDashboard() {
   const pending    = shipments.filter(s => s.status === 'pending').length;
   const atCustoms  = shipments.filter(s => s.status === 'customs').length;
 
-  const unpaidCharges = shipments.filter(s => s.pendingCharge && !s.pendingCharge.paid).length;
-  const paidCharges   = shipments.filter(s => s.pendingCharge?.paid).length;
+  const unpaidCharges     = shipments.filter(s => s.pendingCharge && !s.pendingCharge.paid).length;
+  const paidCharges       = shipments.filter(s => s.pendingCharge?.paid).length;
   const activeChargeTypes = charges.filter(c => c.active).length;
 
   const recent = [...shipments].slice(0, 6);
 
   const stats = [
+    { label: 'Total Shipments', value: total,     icon: Package,    iconBg: 'bg-orange-50', iconColor: 'text-orange-500', sub: `${pending} pending` },
+    { label: 'In Transit',      value: inTransit, icon: TrendingUp, iconBg: 'bg-blue-50',   iconColor: 'text-blue-500',   sub: `${atCustoms} at customs` },
+    { label: 'Delivered',       value: delivered, icon: CheckCircle,iconBg: 'bg-green-50',  iconColor: 'text-green-600',  sub: `${Math.round((delivered / (total || 1)) * 100)}% success rate` },
     {
-      label: 'Total Shipments',
-      value: total,
-      icon: Package,
-      iconBg: 'bg-orange-50',
-      iconColor: 'text-orange-500',
-      sub: `${pending} pending`,
-    },
-    {
-      label: 'In Transit',
-      value: inTransit,
-      icon: TrendingUp,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-500',
-      sub: `${atCustoms} at customs`,
-    },
-    {
-      label: 'Delivered',
-      value: delivered,
-      icon: CheckCircle,
-      iconBg: 'bg-green-50',
-      iconColor: 'text-green-600',
-      sub: `${Math.round((delivered / (total || 1)) * 100)}% success rate`,
-    },
-    {
-      label: 'Unpaid Charges',
-      value: unpaidCharges,
-      icon: DollarSign,
+      label: 'Unpaid Charges', value: unpaidCharges, icon: DollarSign,
       iconBg: unpaidCharges > 0 ? 'bg-red-50' : 'bg-slate-50',
       iconColor: unpaidCharges > 0 ? 'text-red-500' : 'text-slate-400',
       sub: `${paidCharges} cleared · ${activeChargeTypes} charge types`,
@@ -59,7 +45,6 @@ export default function AdminDashboard() {
   return (
     <AdminLayout title="Dashboard">
 
-      {/* Stats grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {stats.map(s => (
           <div key={s.label} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
@@ -75,7 +60,6 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Exception + unpaid charge alerts */}
       <div className="space-y-3 mb-6">
         {exceptions > 0 && (
           <div className="bg-red-50 border border-red-100 rounded-2xl px-5 py-4 flex items-center gap-3">
@@ -83,53 +67,40 @@ export default function AdminDashboard() {
               <AlertCircle size={15} className="text-red-500" />
             </div>
             <div className="flex-1">
-              <span className="text-red-700 font-semibold text-sm">
-                {exceptions} shipment{exceptions > 1 ? 's' : ''} flagged as Exception
-              </span>
+              <span className="text-red-700 font-semibold text-sm">{exceptions} shipment{exceptions > 1 ? 's' : ''} flagged as Exception</span>
               <p className="text-red-400 text-xs mt-0.5">Delivery could not be completed — action required.</p>
             </div>
-            <Link to="/admin/shipments" className="text-red-500 text-xs font-bold hover:text-red-600 flex items-center gap-1 shrink-0">
-              Review <ArrowRight size={12} />
-            </Link>
+            <Link to="/admin/shipments" className="text-red-500 text-xs font-bold hover:text-red-600 flex items-center gap-1 shrink-0">Review <ArrowRight size={12} /></Link>
           </div>
         )}
-
         {unpaidCharges > 0 && (
           <div className="bg-amber-50 border border-amber-100 rounded-2xl px-5 py-4 flex items-center gap-3">
             <div className="w-8 h-8 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
               <DollarSign size={15} className="text-amber-600" />
             </div>
             <div className="flex-1">
-              <span className="text-amber-800 font-semibold text-sm">
-                {unpaidCharges} unpaid charge{unpaidCharges > 1 ? 's' : ''} outstanding
-              </span>
+              <span className="text-amber-800 font-semibold text-sm">{unpaidCharges} unpaid charge{unpaidCharges > 1 ? 's' : ''} outstanding</span>
               <p className="text-amber-600 text-xs mt-0.5">Awaiting customer payment via email.</p>
             </div>
-            <Link to="/admin/shipments" className="text-amber-600 text-xs font-bold hover:text-amber-700 flex items-center gap-1 shrink-0">
-              Review <ArrowRight size={12} />
-            </Link>
+            <Link to="/admin/shipments" className="text-amber-600 text-xs font-bold hover:text-amber-700 flex items-center gap-1 shrink-0">Review <ArrowRight size={12} /></Link>
           </div>
         )}
       </div>
 
-      {/* Status breakdown bar */}
       <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm mb-6">
         <h2 className="font-bold text-slate-900 text-sm mb-4">Shipment Status Overview</h2>
         <div className="space-y-3">
           {([
-            { key: 'pending',    label: 'Pending',    count: pending,   color: 'bg-yellow-400' },
-            { key: 'in_transit', label: 'In Transit', count: inTransit, color: 'bg-blue-500' },
-            { key: 'customs',    label: 'At Customs', count: atCustoms, color: 'bg-purple-500' },
-            { key: 'delivered',  label: 'Delivered',  count: delivered, color: 'bg-green-500' },
-            { key: 'exception',  label: 'Exception',  count: exceptions,color: 'bg-red-500' },
+            { label: 'Pending',    count: pending,   color: 'bg-yellow-400' },
+            { label: 'In Transit', count: inTransit, color: 'bg-blue-500' },
+            { label: 'At Customs', count: atCustoms, color: 'bg-purple-500' },
+            { label: 'Delivered',  count: delivered, color: 'bg-green-500' },
+            { label: 'Exception',  count: exceptions,color: 'bg-red-500' },
           ] as const).map(({ label, count, color }) => (
             <div key={label} className="flex items-center gap-3">
               <div className="w-24 text-xs font-semibold text-slate-500 shrink-0">{label}</div>
               <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
-                <div
-                  className={`h-2 rounded-full ${color} transition-all duration-500`}
-                  style={{ width: total ? `${(count / total) * 100}%` : '0%' }}
-                />
+                <div className={`h-2 rounded-full ${color} transition-all duration-500`} style={{ width: total ? `${(count / total) * 100}%` : '0%' }} />
               </div>
               <div className="w-6 text-right text-xs font-black text-slate-700 shrink-0">{count}</div>
             </div>
@@ -137,13 +108,10 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Recent shipments */}
       <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h2 className="font-bold text-slate-900">Recent Shipments</h2>
-          <Link to="/admin/shipments" className="text-orange-500 text-sm font-semibold hover:text-orange-600 flex items-center gap-1">
-            View all <ArrowRight size={13} />
-          </Link>
+          <Link to="/admin/shipments" className="text-orange-500 text-sm font-semibold hover:text-orange-600 flex items-center gap-1">View all <ArrowRight size={13} /></Link>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -156,7 +124,7 @@ export default function AdminDashboard() {
             </thead>
             <tbody className="divide-y divide-slate-50">
               {recent.length === 0 && (
-                <tr><td colSpan={6} className="text-center py-10 text-slate-400 text-sm">No shipments yet</td></tr>
+                <tr><td colSpan={6} className="text-center py-10 text-slate-400 text-sm">Loading…</td></tr>
               )}
               {recent.map(s => (
                 <tr key={s.id} className="hover:bg-slate-50/50 transition-colors">
@@ -177,9 +145,7 @@ export default function AdminDashboard() {
                       <span className={`text-xs font-bold ${s.pendingCharge.paid ? 'text-green-600' : 'text-orange-500'}`}>
                         {s.pendingCharge.paid ? '✓ Paid' : '⏳ Unpaid'}
                       </span>
-                    ) : (
-                      <span className="text-xs text-slate-300">—</span>
-                    )}
+                    ) : <span className="text-xs text-slate-300">—</span>}
                   </td>
                 </tr>
               ))}

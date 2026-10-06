@@ -5,9 +5,10 @@ import {
   Search, Truck, Plane, Package, CheckCircle, Clock, AlertCircle,
   MapPin, ArrowLeft, Shield, FileText, DollarSign, Mail, ExternalLink,
 } from 'lucide-react';
-import { getShipments, STATUS_LABELS } from '@/lib/shipments';
+import { STATUS_LABELS } from '@/lib/shipments';
 import type { Shipment, ShipmentStatus } from '@/lib/shipments';
-import { getChargeById, formatFee } from '@/lib/charges';
+import { formatFee, type ChargeableStatus } from '@/lib/charges';
+import { shipmentApi, chargeApi } from '@/lib/api';
 
 /* ── City coordinates ── */
 const CITY_COORDS: Record<string, [number, number]> = {
@@ -198,9 +199,9 @@ function ShipmentMap({ origin, destination }: { origin: string; destination: str
 }
 
 /* ── Charge banner ── */
-function ChargeBanner({ shipment: s }: { shipment: Shipment }) {
+function ChargeBanner({ shipment: s, charges }: { shipment: Shipment; charges: ChargeableStatus[] }) {
   if (!s.pendingCharge || s.pendingCharge.paid) return null;
-  const charge = getChargeById(s.pendingCharge.chargeId);
+  const charge = charges.find(c => c.id === s.pendingCharge!.chargeId) ?? null;
   if (!charge) return null;
 
   return (
@@ -258,7 +259,7 @@ function NotFound({ id }: { id: string }) {
 }
 
 /* ── Result card ── */
-function TrackResult({ shipment: s }: { shipment: Shipment }) {
+function TrackResult({ shipment: s, charges }: { shipment: Shipment; charges: ChargeableStatus[] }) {
   const stageIndex = STATUS_STAGE_INDEX[s.status];
   const events = getEvents(s);
   const ServiceIcon = SERVICE_ICON[s.service] ?? Package;
@@ -283,7 +284,7 @@ function TrackResult({ shipment: s }: { shipment: Shipment }) {
       </div>
 
       {/* Charge banner — shown before route if unpaid charge exists */}
-      <ChargeBanner shipment={s} />
+      <ChargeBanner shipment={s} charges={charges} />
 
       {/* Route card */}
       <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm mb-5">
@@ -424,26 +425,28 @@ export default function TrackPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState(id ?? '');
   const [searched, setSearched] = useState(id ?? '');
-  const [shipment, setShipment] = useState<Shipment | undefined>(() => {
-    const term = (id ?? '').trim();
-    if (!term) return undefined;
-    return getShipments().find(s => s.id.trim().toLowerCase() === term.toLowerCase());
-  });
+  const [shipment, setShipment] = useState<Shipment | undefined>();
+  const [charges, setCharges] = useState<ChargeableStatus[]>([]);
   const [notFound, setNotFound] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => { chargeApi.list().then(setCharges); }, []);
 
   useEffect(() => {
     if (!searched) { setShipment(undefined); setNotFound(false); return; }
-    const found = getShipments().find(s => s.id.trim().toLowerCase() === searched.trim().toLowerCase());
-    setShipment(found);
-    setNotFound(!found);
+    setLoading(true);
+    setNotFound(false);
+    shipmentApi.list()
+      .then(all => {
+        const found = all.find(s => s.id.trim().toLowerCase() === searched.trim().toLowerCase());
+        setShipment(found);
+        setNotFound(!found);
+      })
+      .finally(() => setLoading(false));
   }, [searched]);
 
-  // Sync when navigating directly to a URL (e.g. from home page form)
   useEffect(() => {
-    if (id && id !== searched) {
-      setQuery(id);
-      setSearched(id);
-    }
+    if (id && id !== searched) { setQuery(id); setSearched(id); }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -508,8 +511,11 @@ export default function TrackPage() {
           </div>
         </motion.div>
 
-        {searched && shipment && <TrackResult key={searched} shipment={shipment} />}
-        {searched && notFound && <NotFound id={searched} />}
+        {searched && loading && (
+          <div className="text-center py-20 text-slate-400 text-sm">Searching…</div>
+        )}
+        {searched && !loading && shipment && <TrackResult key={searched} shipment={shipment} charges={charges} />}
+        {searched && !loading && notFound && <NotFound id={searched} />}
 
         {!searched && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
