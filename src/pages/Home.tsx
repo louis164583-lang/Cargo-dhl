@@ -59,7 +59,6 @@ function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/admin/login" className="text-white/50 text-xs font-medium hover:text-white/80 transition-colors">Admin</Link>
           <Link to="/track" className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-full transition-all hover:scale-105 shadow-lg shadow-orange-500/30">
             Track
           </Link>
