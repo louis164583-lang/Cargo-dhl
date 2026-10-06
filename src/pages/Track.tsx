@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -424,16 +424,19 @@ export default function TrackPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState(id ?? '');
   const [searched, setSearched] = useState(id ?? '');
-  const [shipment, setShipment] = useState<Shipment | undefined>(undefined);
+  const [shipment, setShipment] = useState<Shipment | undefined>(() => {
+    const term = (id ?? '').trim();
+    if (!term) return undefined;
+    return getShipments().find(s => s.id.toLowerCase() === term.toLowerCase());
+  });
+  const [notFound, setNotFound] = useState(false);
 
-  // Re-read from localStorage whenever searched changes or URL param changes
-  const lookup = useCallback((term: string) => {
-    if (!term) { setShipment(undefined); return; }
-    const found = getShipments().find(s => s.id.toLowerCase() === term.trim().toLowerCase());
+  useEffect(() => {
+    if (!searched) { setShipment(undefined); setNotFound(false); return; }
+    const found = getShipments().find(s => s.id.toLowerCase() === searched.trim().toLowerCase());
     setShipment(found);
-  }, []);
-
-  useEffect(() => { lookup(searched); }, [searched, lookup]);
+    setNotFound(!found);
+  }, [searched]);
 
   // Sync when navigating directly to a URL (e.g. from home page form)
   useEffect(() => {
@@ -505,11 +508,8 @@ export default function TrackPage() {
           </div>
         </motion.div>
 
-        {searched && (
-          shipment
-            ? <TrackResult key={searched} shipment={shipment} />
-            : <NotFound id={searched} />
-        )}
+        {searched && shipment && <TrackResult key={searched} shipment={shipment} />}
+        {searched && notFound && <NotFound id={searched} />}
 
         {!searched && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
