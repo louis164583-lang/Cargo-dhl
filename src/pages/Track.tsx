@@ -427,13 +427,13 @@ export default function TrackPage() {
   const [shipment, setShipment] = useState<Shipment | undefined>(() => {
     const term = (id ?? '').trim();
     if (!term) return undefined;
-    return getShipments().find(s => s.id.toLowerCase() === term.toLowerCase());
+    return getShipments().find(s => s.id.trim().toLowerCase() === term.toLowerCase());
   });
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     if (!searched) { setShipment(undefined); setNotFound(false); return; }
-    const found = getShipments().find(s => s.id.toLowerCase() === searched.trim().toLowerCase());
+    const found = getShipments().find(s => s.id.trim().toLowerCase() === searched.trim().toLowerCase());
     setShipment(found);
     setNotFound(!found);
   }, [searched]);

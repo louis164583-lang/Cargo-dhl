@@ -123,11 +123,24 @@ export default function AdminShipments() {
     setModal(true);
   }
 
+  const [formError, setFormError] = useState('');
+
   function saveForm() {
-    if (!form.client || !form.origin || !form.destination) return;
+    const id          = form.id.trim();
+    const client      = form.client.trim();
+    const origin      = form.origin.trim();
+    const destination = form.destination.trim();
+
+    if (!id)          { setFormError('Tracking ID is required.'); return; }
+    if (!client)      { setFormError('Client name is required.'); return; }
+    if (!origin)      { setFormError('Origin is required.'); return; }
+    if (!destination) { setFormError('Destination is required.'); return; }
+
+    setFormError('');
+    const cleanForm = { ...form, id, client, origin, destination };
     const updated = editingId
-      ? shipments.map(s => s.id === editingId ? { ...s, ...form } : s)
-      : [{ ...form } as Shipment, ...shipments];
+      ? shipments.map(s => s.id === editingId ? { ...s, ...cleanForm } : s)
+      : [cleanForm as Shipment, ...shipments];
     replaceAllShipments(updated);
     setShipments(updated);
     setModal(false);
@@ -330,12 +343,17 @@ export default function AdminShipments() {
       {/* Shipment Edit/Create Modal */}
       {modal && (
         <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-8 overflow-y-auto">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setModal(false)} />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => { setModal(false); setFormError(''); }} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 my-4">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-bold text-slate-900 text-lg">{editingId ? 'Edit Shipment' : 'New Shipment'}</h3>
-              <button onClick={() => setModal(false)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
+              <button onClick={() => { setModal(false); setFormError(''); }} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
             </div>
+            {formError && (
+              <div className="mb-4 flex items-center gap-2 bg-red-50 border border-red-100 rounded-xl px-4 py-3 text-sm text-red-600 font-medium">
+                <AlertCircle size={14} className="shrink-0" /> {formError}
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-4">
               {[
                 { label: 'Tracking ID', key: 'id', type: 'text', disabled: !!editingId },
