@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.2.0",
     "framer-motion": "^11.0.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.400.0",

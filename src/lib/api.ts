@@ -12,7 +12,7 @@ async function req<T>(method: string, path: string, body?: unknown): Promise<T> 
   if (!res.ok) throw new Error(`${res.status} ${method} ${path}`);
   const text = await res.text();
   return text ? (JSON.parse(text) as T) : (undefined as T);
-}
+} 
 
 export const shipmentApi = {
   list:   ()            => req<Shipment[]>('GET', '/shipments'),
@@ -27,3 +27,4 @@ export const chargeApi = {
   update: (c: ChargeableStatus) => req<ChargeableStatus>('PUT', `/charges/${encodeURIComponent(c.id)}`, c),
   remove: (id: string)          => req<void>('DELETE', `/charges/${encodeURIComponent(id)}`),
 };
+ 
