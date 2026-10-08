@@ -108,11 +108,6 @@ export default function AdminLogin() {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-white/8 text-center">
-            <p className="text-white/25 text-xs">
-              Default: <span className="font-mono text-white/40">admin</span> / <span className="font-mono text-white/40">Admin@CargoDHL2026</span>
-            </p>
-          </div>
         </div>
 
         <p className="text-center text-white/20 text-xs mt-5">

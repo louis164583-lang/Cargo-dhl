@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { logout, getAdminUser } from '@/lib/auth';
 import {
-  LayoutDashboard, Package, DollarSign, LogOut, Menu, X, Truck, ChevronRight,
+  LayoutDashboard, Package, DollarSign, LogOut, Menu, X, Truck, ChevronRight, Settings,
 } from 'lucide-react';
 
 const nav = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Shipments', href: '/admin/shipments', icon: Package },
   { label: 'Charges', href: '/admin/charges', icon: DollarSign },
+  { label: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
 export default function AdminLayout({ children, title }: { children: React.ReactNode; title: string }) {

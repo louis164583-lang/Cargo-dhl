@@ -5,6 +5,7 @@ import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminShipments from './pages/admin/AdminShipments';
 import AdminCharges from './pages/admin/AdminCharges';
+import AdminSettings from './pages/admin/AdminSettings';
 import ContactPage from './pages/Contact';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -38,6 +39,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <AdminCharges />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/settings"
+          element={
+            <ProtectedRoute>
+              <AdminSettings />
             </ProtectedRoute>
           }
         />

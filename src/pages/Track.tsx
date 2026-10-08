@@ -253,7 +253,7 @@ function NotFound({ id }: { id: string }) {
       <p className="text-slate-400 text-sm mb-6">
         We couldn't find a shipment with ID <span className="font-mono font-semibold text-slate-600">"{id}"</span>.
       </p>
-      <p className="text-slate-400 text-xs">Try: <span className="font-mono text-slate-600">CDHL-0013-LG</span></p>
+      <p className="text-slate-400 text-xs">Please check the tracking ID and try again.</p>
     </div>
   );
 }
@@ -500,15 +500,7 @@ export default function TrackPage() {
             </button>
           </form>
 
-          <div className="flex flex-wrap items-center gap-2 mb-8 text-xs text-slate-400">
-            <span>Try:</span>
-            {['CDHL-0012-NY', 'CDHL-0013-LG', 'CDHL-0014-LN', 'CDHL-0017-NY'].map(tid => (
-              <button key={tid} onClick={() => { setQuery(tid); setSearched(tid); navigate(`/track/${tid}`, { replace: true }); }}
-                className="font-mono text-orange-500 hover:text-orange-600 bg-orange-50 hover:bg-orange-100 px-2.5 py-1 rounded-lg transition-colors">
-                {tid}
-              </button>
-            ))}
-          </div>
+          <div className="mb-8" />
         </motion.div>
 
         {searched && loading && (
