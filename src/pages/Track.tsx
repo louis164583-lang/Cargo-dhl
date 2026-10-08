@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Search, Truck, Plane, Package, CheckCircle, Clock, AlertCircle,
-  MapPin, ArrowLeft, Shield, FileText, DollarSign, Mail, ExternalLink,
+  MapPin, ArrowLeft, Shield, FileText, DollarSign, Mail,
 } from 'lucide-react';
 import { STATUS_LABELS } from '@/lib/shipments';
 import type { Shipment, ShipmentStatus } from '@/lib/shipments';
@@ -227,9 +227,9 @@ function ChargeBanner({ shipment: s, charges }: { shipment: Shipment; charges: C
             <div>
               <p className="text-red-800 text-sm font-semibold">To clear this charge and release your shipment:</p>
               <p className="text-red-600 text-sm mt-1">
-                Contact our customer service team at{' '}
-                <a href="mailto:cdhl04192@gmail.com" className="font-bold underline underline-offset-2 hover:text-red-700 inline-flex items-center gap-1">
-                  cdhl04192@gmail.com <ExternalLink size={11} />
+                Contact our customer service team —{' '}
+                <a href="mailto:cdhl04192@gmail.com" className="font-bold underline underline-offset-2 hover:text-red-700">
+                  email us
                 </a>
                 {' '}quoting your tracking number <span className="font-mono font-bold">{s.id}</span>
               </p>
@@ -425,6 +425,7 @@ export default function TrackPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState(id ?? '');
   const [searched, setSearched] = useState(id ?? '');
+  const [fetchKey, setFetchKey] = useState(0);
   const [shipment, setShipment] = useState<Shipment | undefined>();
   const [charges, setCharges] = useState<ChargeableStatus[]>([]);
   const [notFound, setNotFound] = useState(false);
@@ -443,10 +444,10 @@ export default function TrackPage() {
         setNotFound(!found);
       })
       .finally(() => setLoading(false));
-  }, [searched]);
+  }, [searched, fetchKey]);
 
   useEffect(() => {
-    if (id && id !== searched) { setQuery(id); setSearched(id); }
+    if (id && id !== searched) { setQuery(id); setSearched(id); setFetchKey(k => k + 1); }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -455,6 +456,7 @@ export default function TrackPage() {
     const trimmed = query.trim();
     if (!trimmed) return;
     setSearched(trimmed);
+    setFetchKey(k => k + 1);
     navigate(`/track/${trimmed}`, { replace: true });
   }
 
@@ -500,7 +502,6 @@ export default function TrackPage() {
             </button>
           </form>
 
-          <div className="mb-8" />
         </motion.div>
 
         {searched && loading && (
