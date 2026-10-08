@@ -1,7 +1,7 @@
 import type { Shipment } from './shipments';
 import type { ChargeableStatus } from './charges';
 
-const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
+const BASE = 'https://cargo-dhl.onrender.com';
 
 async function req<T>(method: string, path: string, body?: unknown): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
