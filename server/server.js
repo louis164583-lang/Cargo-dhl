@@ -10,6 +10,8 @@ app.use(cors());
 app.use(middlewares);
 app.use(router);
 
+app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`JSON Server running on port ${PORT}`);
