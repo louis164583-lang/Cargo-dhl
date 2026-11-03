@@ -8,9 +8,8 @@ const middlewares = jsonServer.defaults({ noCors: true });
 
 app.use(cors());
 app.use(middlewares);
-app.use(router);
-
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.use(router);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
